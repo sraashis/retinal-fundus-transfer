@@ -93,6 +93,8 @@ We would like to highlight a very use full feature called dataset pooling. With 
 1. DRIVE Dataset, J. Staal, M. Abramoff, M. Niemeijer, M. Viergever, and B. van Ginneken, “Ridge based vessel segmentation in color images of the retina,” IEEE Transactions on Medical Imaging 23, 501–509 (2004)
 2. STARE Dataset, A. D. Hoover, V. Kouznetsova, and M. Goldbaum, “Locating blood vessels in retinal images by piecewise threshold
        probing of a matched filter response,” IEEE Transactions on Med. Imaging 19, 203–210 (2000)
-3. Our paper on vessel segmentation:
+3. Architecture used, O. Ronneberger, P. Fischer, and T. Brox, “U-net: Convolutional networks for biomedical image segmentation,” in
+    MICCAI, (2015)
+4. Our paper on vessel segmentation:
     * [Link to arxiv](https://arxiv.org/abs/1903.07803)
     * [Dynamic Deep Networks for Retinal Vessel Segmentation](https://www.frontiersin.org/articles/10.3389/fcomp.2020.00035/abstract)
