@@ -1,27 +1,27 @@
-## This is a working example of [easytorch](https://github.com/sraashis/easytorch). A quick and easy way to run pytorch based neural network experiments. This example , consist of retinal blood vessel segmentation on two datasets. We have shown a per-data experiment setup, and pooled version of all datasets.
+### This is a working example of [easytorch](https://github.com/sraashis/easytorch). A quick and easy way to run pytorch based neural network experiments. 
+### This example consist of retinal blood vessel segmentation on two datasets- DRIVE<sub>[1]</sub>, and STARE<sub>[2]</sub>. 
+### We have shown a per-data experiment setup, and pooled version of all datasets in this repo
+Note that one **MUST cite the original authors** if these dataset are used in your research (references at the end).
 
 1. Initialize the **dataspecs.py** as follows. Non existing directories will be automatically created in the first run.
 ```python
 import os
 
 sep = os.sep
-# --------------------------------------------------------------------------------------------
-
 DRIVE = {
     'data_dir': 'DRIVE' + sep + 'images',
-    'mask_dir': 'DRIVE' + sep + 'mask',
-    'label_dir': 'DRIVE' + sep + 'OD_Segmentation',
+    'label_dir': 'DRIVE' + sep + 'manual',
     'split_dir': 'DRIVE' + sep + 'splits',
-    'label_getter': lambda file_name: file_name.split('.')[0] + '_gt.tif',
-    'mask_getter': lambda file_name: file_name.split('_')[0] + '_mask.gif',
+    'label_getter': lambda file_name: file_name.split('_')[0] + '_manual1.gif',
+    'mask_getter': lambda file_name: file_name.split('_')[0] + '_mask.gif'
+}
+STARE = {
+    'data_dir': 'STARE' + sep + 'stare-images',
+    'label_dir': 'STARE' + sep + 'labels-ah',
+    'split_dir': 'STARE' + sep + 'splits',
+    'label_getter': lambda file_name: file_name.split('.')[0] + '.ah.pgm',
 }
 
-AV_WIDE = {
-    'data_dir': 'AV-WIDE' + sep + 'images',
-    'label_dir': 'AV-WIDE' + sep + 'OD_Segmentation',
-    'split_dir': 'AV-WIDE' + sep + 'splits',
-    'label_getter': lambda file_name: file_name.split('.')[0] + '_gt.png'
-}
 ```
 * **data_dir** is the path to images/or any data points.
 * **label_dir** is the path to ground truth.
@@ -33,9 +33,10 @@ AV_WIDE = {
 * One of the arguments is -data/--dataset_dir which points to the root directory of the dataset. 
 * So the program looks for an image say. image_001.png in dataset_dir/data_dir/images/image_001.png.
 * [Example](https://github.com/sraashis/easytorch/tree/master/example) AV-WIDE dataset has the following structure:
-    * datasets/AV-WIDE/images/
-    * datasets/AV-WIDE/manual (segmentation ground truth)
-    * datasets/AV-WIDE/splits
+    * datasets/DRIVE/images/
+    * datasets/DRIVE/manual (segmentation ground truth)
+    * datasets/DRIVE/splits
+    * datasets/DRIVE/masks
 * **splits** directory should consist **k** splits for k-fold cross validation. 
 * **splits** are json files that determines which files are for test, validation , and for test.
 * We have a [K-folds creater utility](https://github.com/sraashis/easytorch/blob/master/easytorch/utils/datautils.py) to generate such folds. So, at the moment a user have to use it to create the splits and place them in splits directory.
@@ -54,35 +55,26 @@ from classification import MyTrainer, MyDataset
 
 ap = argparse.ArgumentParser(parents=[ap], add_help=False)
 
-dataspecs = [dspec.AV_WIDE, dspec.VEVIO]
+dataspecs = [dspec.DRIVE, dspec.STARE]
 if __name__ == "__main__":
     run(ap, dataspecs, MyTrainer, MyDataset)
     pooled_run(ap, dataspecs, MyTrainer, MyDataset)
 ```
 
-##### **Training+Validation+Test**
-    * $python main.py -p train -nch 3 -e 3 -b 2 -sp True
-##### **Only Test**
+##### Parameters used in **Training+Validation+Test**
+    * $python main.py -p train -nch 1 -e 21 -b 8 -sp True -mxp True -r 1
+##### To run **Only Test**
     * $python main.py -p test -nch 3 -e 3 -b 2 -sp True
 
-Here we like to highlight a very use ful feature call dataset pooling. With such, one can easily run experiments by combining any number of datasets as :
+We would like to highlight a very use full feature called dataset pooling. With such, one can easily run experiments by combining any number of datasets as :
 * For that, we only need to write dataspecs.py for the dataset we want to pool.
 * **run** method runs for all dataset separately  at a time.
-* **pooled_run** pools all the dataset and runs experiments like in the example where we combine two datasets **[dspec.DRIVE, dspec.AV_WIDE]** internally creating a larger unified dataset and training on that.
-
-
-
-
+* **pooled_run** pools all the dataset and runs experiments like in the example where we combine two datasets **[dspec.DRIVE, dspec.STARE]** internally creating a larger unified dataset and training on that.
 
 **Fundus images/masks used in example are from the following datasets. Whereas, optic disc ground truth are product of our work (Optical Disc Segmentation using Disk Centered Patch Augmentation):**
-* AV-WIDE Dataset Reference:
-    * R. Estrada, C. Tomasi, S. C. Schmidler, and S. Farsiu, “Tree topology estimation,” IEEE Transactions on Pattern
-    Analysis Mach. Intell. 37, 1688–1701 (2015)
-    * R. Estrada, M. J. Allingham, P. S. Mettu, S. W. Cousins, C. Tomasi, and S. Farsiu, “Retinal artery-vein classification
-        via topology estimation,” IEEE Transactions on Med. Imaging 34, 2518–2534 (2015).
-* VEVIO Dataset Reference: 
-    * R. Estrada, C. Tomasi, M. T. Cabrera, D. K. Wallace, S. F. Freedman, and S. Farsiu, “Exploratory dijkstra forest
-    based automatic vessel segmentation: applications in video indirect ophthalmoscopy (vio),” Biomed Opt Express 3,
-    327–339 (2012). 22312585[pmid].
-* Vessel Segmentation ground are a product of the following paper:
+1. DRIVE Dataset, J. Staal, M. Abramoff, M. Niemeijer, M. Viergever, and B. van Ginneken, “Ridge based vessel segmentation in color images of the retina,” IEEE Transactions on Medical Imaging 23, 501–509 (2004)
+2. STARE Dataset, A. D. Hoover, V. Kouznetsova, and M. Goldbaum, “Locating blood vessels in retinal images by piecewise threshold
+       probing of a matched filter response,” IEEE Transactions on Med. Imaging 19, 203–210 (2000)
+3. Our paper on vessel segmentation:
+    * [Link to arxiv](https://arxiv.org/abs/1903.07803)
     * [Dynamic Deep Networks for Retinal Vessel Segmentation](https://www.frontiersin.org/articles/10.3389/fcomp.2020.00035/abstract)

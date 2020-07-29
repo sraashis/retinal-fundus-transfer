@@ -1,84 +1,85 @@
-import torch.nn as nn
+import torch
 import torch.nn.functional as F
-
-from easytorch.core.utils import safe_concat
-
-
-class BasicConv2d(nn.Module):
-
-    def __init__(self, in_channels, out_channels, **kw):
-        super(BasicConv2d, self).__init__()
-        self.conv = nn.Conv2d(in_channels, out_channels, bias=False, **kw)
-        self.bn = nn.BatchNorm2d(out_channels, eps=0.001)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        return F.relu(x, inplace=True)
+from torch import nn
 
 
-class MXPConv2d(nn.Module):
-    def __init__(self, in_channels, out_channels, mxp_k=2, mxp_s=2, **kw):
-        super(MXPConv2d, self).__init__()
-        self.conv = BasicConv2d(in_channels, out_channels, **kw)
-        self.mx_k = mxp_k
-        self.mxp_s = mxp_s
+class _DoubleConvolution(nn.Module):
+    def __init__(self, in_channels, middle_channel, out_channels, p=0):
+        super(_DoubleConvolution, self).__init__()
+        layers = [
+            nn.Conv2d(in_channels, middle_channel, kernel_size=3, padding=p),
+            nn.BatchNorm2d(middle_channel),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(middle_channel, out_channels, kernel_size=3, padding=p),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True)
+        ]
+        self.encode = nn.Sequential(*layers)
 
     def forward(self, x):
-        x = F.max_pool2d(x, kernel_size=self.mx_k, stride=self.mxp_s)
-        return self.conv(x)
+        return self.encode(x)
 
 
-class UpConv2d(nn.Module):
-    def __init__(self, in_channels, out_channels, **kw):
-        super(UpConv2d, self).__init__()
-        self.conv_up = nn.ConvTranspose2d(in_channels, out_channels, **kw)
-        self.conv = BasicConv2d(out_channels, out_channels, kernel_size=3, padding=1)
+class UNet(nn.Module):
+    def __init__(self, num_channels, num_classes, reduce_by=1):
+        super(UNet, self).__init__()
+        self.A1_ = _DoubleConvolution(num_channels, int(64 / reduce_by), int(64 / reduce_by))
+        self.A2_ = _DoubleConvolution(int(64 / reduce_by), int(128 / reduce_by), int(128 / reduce_by))
+        self.A3_ = _DoubleConvolution(int(128 / reduce_by), int(256 / reduce_by), int(256 / reduce_by))
+        self.A4_ = _DoubleConvolution(int(256 / reduce_by), int(512 / reduce_by), int(512 / reduce_by))
 
-    def forward(self, x):
-        x = self.conv_up(x)
-        return self.conv(x)
+        self.A_mid = _DoubleConvolution(int(512 / reduce_by), int(1024 / reduce_by), int(1024 / reduce_by))
 
+        self.A4_up = nn.ConvTranspose2d(int(1024 / reduce_by), int(512 / reduce_by), kernel_size=2, stride=2)
+        self._A4 = _DoubleConvolution(int(1024 / reduce_by), int(512 / reduce_by), int(512 / reduce_by))
 
-class MYModel(nn.Module):
-    def __init__(self, in_ch, num_class, r=8):
-        super(MYModel, self).__init__()
-        self.c1 = BasicConv2d(in_ch, r, kernel_size=3, padding=1)
+        self.A3_up = nn.ConvTranspose2d(int(512 / reduce_by), int(256 / reduce_by), kernel_size=2, stride=2)
+        self._A3 = _DoubleConvolution(int(512 / reduce_by), int(256 / reduce_by), int(256 / reduce_by))
 
-        self.c2 = MXPConv2d(r, 2 * r, kernel_size=3, padding=1)
-        self.c3 = MXPConv2d(2 * r, 4 * r, kernel_size=3, padding=1)
-        self.c4 = MXPConv2d(4 * r, 8 * r, kernel_size=3, padding=1)
+        self.A2_up = nn.ConvTranspose2d(int(256 / reduce_by), int(128 / reduce_by), kernel_size=2, stride=2)
+        self._A2 = _DoubleConvolution(int(256 / reduce_by), int(128 / reduce_by), int(128 / reduce_by))
 
-        self.c5 = UpConv2d(8 * r, 4 * r, kernel_size=2, stride=2, padding=0)
-        self.c6 = UpConv2d(4 * r, 2 * r, kernel_size=2, stride=2, padding=0)
-        self.c7 = UpConv2d(2 * r, r, kernel_size=2, stride=2, padding=0)
+        self.A1_up = nn.ConvTranspose2d(int(128 / reduce_by), int(64 / reduce_by), kernel_size=2, stride=2)
+        self._A1 = _DoubleConvolution(int(128 / reduce_by), int(64 / reduce_by), int(64 / reduce_by))
 
-        self.c8 = MXPConv2d(2 * r, 4 * r, kernel_size=3, padding=1)
-        self.c9 = MXPConv2d(4 * r, 8 * r, kernel_size=3, padding=1)
-        self.c10 = MXPConv2d(8 * r, 16 * r, kernel_size=3, padding=1)
-
-        self.c11 = UpConv2d(24 * r, 16 * r, kernel_size=2, stride=2, padding=0)
-        self.c12 = UpConv2d(16 * r, 8 * r, kernel_size=2, stride=2, padding=0)
-        self.c13 = UpConv2d(8 * r, 4 * r, kernel_size=2, stride=2, padding=0)
-
-        self.out = nn.Conv2d(4 * r, num_class, kernel_size=1)
+        self.final = nn.Conv2d(int(64 / reduce_by), num_classes, kernel_size=1)
 
     def forward(self, x):
-        x1 = self.c1(x)
-        x = self.c2(x1)
-        x = self.c3(x)
-        x4 = self.c4(x)
+        a1_ = self.A1_(x)
+        a1_dwn = F.max_pool2d(a1_, kernel_size=2, stride=2)
 
-        x = self.c5(x4)
-        x = self.c6(x)
-        x7 = self.c7(x)
+        a2_ = self.A2_(a1_dwn)
+        a2_dwn = F.max_pool2d(a2_, kernel_size=2, stride=2)
 
-        x = self.c8(safe_concat(x1, x7))
-        x = self.c9(x)
-        x10 = self.c10(x)
+        a3_ = self.A3_(a2_dwn)
+        a3_dwn = F.max_pool2d(a3_, kernel_size=2, stride=2)
 
-        x = self.c11(safe_concat(x4, x10))
-        x = self.c12(x)
-        x = self.c13(x)
+        a4_ = self.A4_(a3_dwn)
+        # a4_ = F.dropout(a4_, p=0.2)
+        a4_dwn = F.max_pool2d(a4_, kernel_size=2, stride=2)
 
-        return self.out(x)
+        a_mid = self.A_mid(a4_dwn)
+
+        a4_up = self.A4_up(a_mid)
+        _a4 = self._A4(UNet.match_and_concat(a4_, a4_up))
+        # _a4 = F.dropout(_a4, p=0.2)
+
+        a3_up = self.A3_up(_a4)
+        _a3 = self._A3(UNet.match_and_concat(a3_, a3_up))
+
+        a2_up = self.A2_up(_a3)
+        _a2 = self._A2(UNet.match_and_concat(a2_, a2_up))
+        # _a2 = F.dropout(_a2, p=0.2)
+
+        a1_up = self.A1_up(_a2)
+        _a1 = self._A1(UNet.match_and_concat(a1_, a1_up))
+
+        final = self.final(_a1)
+        return final
+
+    @staticmethod
+    def match_and_concat(bypass, upsampled, crop=True):
+        if crop:
+            c = (bypass.size()[2] - upsampled.size()[2]) // 2
+            bypass = F.pad(bypass, (-c, -c, -c, -c))
+        return torch.cat((upsampled, bypass), 1)
