@@ -32,7 +32,7 @@ STARE = {
 ##### Please check [Our rich argument parser](https://github.com/sraashis/easytorch/blob/master/easytorch/utils/defaultargs.py)
 * One of the arguments is -data/--dataset_dir which points to the root directory of the dataset. 
 * So the program looks for an image say. image_001.png in dataset_dir/data_dir/images/image_001.png.
-* [Example](https://github.com/sraashis/easytorch/tree/master/example) AV-WIDE dataset has the following structure:
+* [Example](https://github.com/sraashis/easytorch/tree/master/example) DRIVE dataset has the following structure:
     * datasets/DRIVE/images/
     * datasets/DRIVE/manual (segmentation ground truth)
     * datasets/DRIVE/splits
@@ -42,8 +42,8 @@ STARE = {
 * We have a [K-folds creater utility](https://github.com/sraashis/easytorch/blob/master/easytorch/utils/datautils.py) to generate such folds. So, at the moment a user have to use it to create the splits and place them in splits directory.
 * This is super helpful when working with cloud deployment/ or google colab. 
 
-2. Override our custom dataloader(**QNDataset**) and implement each item parser as in the example.
-3. Initialize our custom neural network trainer(**QNTrainer**) and implement logic for one iteration, how to save evaluation scores. Sometimes we want to save predictions as images and all so it is necessary. Initialize log headers. More in example.
+2. Override our custom dataloader(**ETDataset**) and implement each item parser as in the example.
+3. Initialize our custom neural network trainer(**ETTrainer**) and implement logic for one iteration, how to save evaluation scores. Sometimes we want to save predictions as images and all so it is necessary. Initialize log headers. More in example.
 4. Implement the entry point
 ```python
 import argparse
