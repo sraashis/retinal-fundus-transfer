@@ -7,9 +7,9 @@ import torch.nn.functional as F
 import torchvision.transforms as tmf
 from PIL import Image as IMG
 
-from quenn.utils.imageutils import Image
-from quenn.core.measurements import Avg, Prf1a
-from quenn.core.nn import QNTrainer, QNDataset
+from easytorch.utils.imageutils import Image
+from easytorch.core.measurements import Avg, Prf1a
+from easytorch.core.nn import QNTrainer, QNDataset
 from models import MYModel
 
 sep = os.sep

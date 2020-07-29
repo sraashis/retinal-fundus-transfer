@@ -1,8 +1,8 @@
 import argparse
 
 import dataspecs as dspec
-from quenn.utils.defaultargs import ap
-from quenn.runs import run, pooled_run
+from easytorch.utils.defaultargs import ap
+from easytorch.runs import run, pooled_run
 from classification import MyTrainer, MyDataset
 
 ap = argparse.ArgumentParser(parents=[ap], add_help=False)
