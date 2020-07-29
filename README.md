@@ -70,6 +70,9 @@ We would like to highlight a very use full feature called dataset pooling. With 
 * For that, we only need to write dataspecs.py for the dataset we want to pool.
 * **run** method runs for all dataset separately  at a time.
 * **pooled_run** pools all the dataset and runs experiments like in the example where we combine two datasets **[dspec.DRIVE, dspec.STARE]** internally creating a larger unified dataset and training on that.
+### Results for DRIVE, STARE and pooled are in net_logs folder
+* It should be trained more epochs to gets state of the art result. 
+* Pretrained weights are not uploaded because of space issues.
 
 1. DRIVE dataset logs.
     * Training log
@@ -78,6 +81,17 @@ We would like to highlight a very use full feature called dataset pooling. With 
         ![DRIVE training log](net_logs/DRIVE/DRIVE_validation_log.png)
 
 2. We ran 5-fold cross validation for STARE dataset. The following are logs of the first fold.
+    * Scores for each folds, and global(combining all folds) in net_logs/STARE/_global_test_scores.csv
+    
+            |Fold                |Precision|REcall|F1    |Accuracy|
+            |--------------------|---------|------|------|--------|
+            |STARE_0.json        |0.8869   |0.6588|0.756 |0.9612  |
+            |STARE_1.json        |0.8273   |0.8144|0.8208|0.975   |
+            |STARE_4.json        |0.7509   |0.8309|0.7889|0.9682  |
+            |STARE_3.json        |0.7945   |0.7675|0.7808|0.9643  |
+            |STARE_2.json        |0.8663   |0.8235|0.8444|0.9731  |
+            |Global              |0.8237   |0.7745|0.7983|0.9684  |
+
     * Training log
         ![STARE fold_0 training log](net_logs/STARE/STARE_0_training_log.png)
     * Validation log

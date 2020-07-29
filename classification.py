@@ -18,30 +18,28 @@ sep = os.sep
 class MyDataset(ETDataset):
     def __init__(self, **kw):
         super().__init__(**kw)
-        self.get_label = kw.get('label_getter')
-        self.get_mask = kw.get('mask_getter')
         self.patch_shape = (388, 388)
         self.patch_offset = (200, 200)
         self.input_shape = (572, 572)
         self.expand_by = (184, 184)
         self.image_objs = {}
 
-    def load_index(self, map_id, file_id, file):
+    def load_index(self, map_id, file):
         dt = self.dmap[map_id]
         img_obj = Image()
         img_obj.load(dt['data_dir'], file)
         img_obj.load_ground_truth(dt['label_dir'], dt['label_getter'])
         img_obj.apply_clahe()
         img_obj.array = img_obj.array[:, :, 1]
-        self.image_objs[file_id] = img_obj
+        self.image_objs[file] = img_obj
         for corners in get_chunk_indexes(img_obj.array.shape, self.patch_shape, self.patch_offset):
-            self.indices.append([map_id, file_id, file] + corners)
+            self.indices.append([map_id, file] + corners)
 
     def __getitem__(self, index):
-        map_id, file_id, file, row_from, row_to, col_from, col_to = self.indices[index]
+        map_id, file, row_from, row_to, col_from, col_to = self.indices[index]
 
-        img = self.image_objs[file_id].array
-        gt = self.image_objs[file_id].ground_truth[row_from:row_to, col_from:col_to]
+        img = self.image_objs[file].array
+        gt = self.image_objs[file].ground_truth[row_from:row_to, col_from:col_to]
 
         p, q, r, s, pad = expand_and_mirror_patch(img.shape, [row_from, row_to, col_from, col_to], self.expand_by)
         img = np.pad(img[p:q, r:s], pad, 'reflect')
@@ -88,24 +86,21 @@ class MyTrainer(ETTrainer):
 
         return {'loss': loss, 'avg_loss': avg, 'output': out, 'scores': sc, 'predictions': pred}
 
-    def save_predictions(self, accumulator):
-        """
-        This only works if load_sparse is on. Which basically means patches of one image in one dataloader.
-        At the moment, it works only if len(dataset) in less that the batch size.
-        The implementation if it is greater than batch size is yet to be done, and can be done
-         because all the necessary information is available here.
-        """
-        try:
-            dataset_name = list(accumulator[0].dmap.keys()).pop()
-            file = accumulator[1][0]['indices'][2][0].split('.')[0]
-            out = accumulator[1][1]['output']
-            img_shape = list(accumulator[0].image_objs.values())[0].array.shape
-            patches = out[:, 1, :, :].cpu().numpy() * 255
-            patches = np.array(patches.squeeze(), dtype=np.uint8)
-            img = merge_patches(patches, img_shape, accumulator[0].patch_shape, accumulator[0].patch_offset)
-            IMG.fromarray(img).save(self.cache['log_dir'] + sep + dataset_name + '_' + file + '.png')
-        except:
-            pass
+    def save_predictions(self, dataset, accumulator):
+        """load_sparse option in default params loads patches of single image in one dataloader.
+         This enables to merge them safely to form the whole image """
+        dataset_name = list(dataset.dmap.keys())[0]
+        file = list(dataset.image_objs.values())[0].file
+        img_shape = dataset.image_objs[file].array.shape
+
+        patches = []
+        for batch, it in accumulator:
+            patches.append(it["output"][:, 1, :, :])
+
+        patches = torch.cat(patches, 0).cpu().numpy() * 255
+        patches = patches.astype(np.uint8)
+        img = merge_patches(patches, img_shape, dataset.patch_shape, dataset.patch_offset)
+        IMG.fromarray(img).save(self.cache['log_dir'] + sep + dataset_name + '_' + file + '.png')
 
     def new_metrics(self):
         return Prf1a()
