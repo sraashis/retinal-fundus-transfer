@@ -1,7 +1,9 @@
 ### This is a working example of [easytorch](https://github.com/sraashis/easytorch). A quick and easy way to run pytorch based neural network experiments. 
-### This example consist of retinal blood vessel segmentation on two datasets- DRIVE<sub>[1]</sub>, and STARE<sub>[2]</sub>. 
-### We have shown a per-data experiment setup, and pooled version of all datasets in this repo
-Note that one **MUST cite the original authors** if these dataset are used in your research (references at the end).
+#### This example consist of retinal blood vessel segmentation on two datasets- DRIVE<sub>[1]</sub>, and STARE<sub>[2]</sub>. 
+#### We have shown a per-data experiment setup, and pooled version of all datasets in this repo. Please check net_logs folder for results.
+
+**<font color="#592e37">Please note that one **MUST cite the original authors** if these dataset are used in your research (references at the end).
+ </font>**
 
 1. Initialize the **dataspecs.py** as follows. Non existing directories will be automatically created in the first run.
 ```python
@@ -31,20 +33,21 @@ STARE = {
 
 ##### Please check [Our rich argument parser](https://github.com/sraashis/easytorch/blob/master/easytorch/utils/defaultargs.py)
 * One of the arguments is -data/--dataset_dir which points to the root directory of the dataset. 
-* So the program looks for an image say. image_001.png in dataset_dir/data_dir/images/image_001.png.
+* So the program looks for an image (say. image_001.png) in dataset_dir/data_dir/images/image_001.png.
 * [Example](https://github.com/sraashis/easytorch/tree/master/example) DRIVE dataset has the following structure:
     * datasets/DRIVE/images/
     * datasets/DRIVE/manual (segmentation ground truth)
     * datasets/DRIVE/splits
     * datasets/DRIVE/masks
+* This helps to work with google colab. You could upload the dataset folder to google drive, and pass in the path to that folder(in google colab notebook) as -data argument.
 * **splits** directory should consist **k** splits for k-fold cross validation. 
 * **splits** are json files that determines which files are for test, validation , and for test.
 * We have a [K-folds creater utility](https://github.com/sraashis/easytorch/blob/master/easytorch/utils/datautils.py) to generate such folds. So, at the moment a user have to use it to create the splits and place them in splits directory.
-* This is super helpful when working with cloud deployment/ or google colab. 
 
 2. Override our custom dataloader(**ETDataset**) and implement each item parser as in the example.
-3. Initialize our custom neural network trainer(**ETTrainer**) and implement logic for one iteration, how to save evaluation scores. Sometimes we want to save predictions as images and all so it is necessary. Initialize log headers. More in example.
+3. Initialize our custom neural network trainer(**ETTrainer**) and implement logic for one iteration, how to save prediction scores. Sometimes we want to save predictions as images and all so it is necessary. Initialize log headers. More in example.
 4. Implement the entry point
+
 ```python
 import argparse
 
@@ -60,6 +63,7 @@ if __name__ == "__main__":
     run(ap, dataspecs, MyTrainer, MyDataset)
     pooled_run(ap, dataspecs, MyTrainer, MyDataset)
 ```
+### Finally Run:
 
 ##### Parameters used in **Training+Validation+Test**
     * $python main.py -p train -nch 1 -e 21 -b 8 -sp True -mxp True -r 1
