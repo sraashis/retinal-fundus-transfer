@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
-from quenn.core.utils import safe_concat
+from easytorch.core.utils import safe_concat
 
 
 class BasicConv2d(nn.Module):
