@@ -2,8 +2,7 @@
  * This example consist of retinal blood vessel segmentation on two datasets- DRIVE<sub>[1]</sub>, and STARE<sub>[2]</sub>. 
 * We have shown a per-data experiment setup, and pooled version of all datasets in this repo. Please check net_logs folder for results.
 
-<font color="#592e37">Please note that one MUST cite the original authors if these dataset are used in your research (references at the end).
- </font>
+<mark>**Please note that one MUST cite the original authors if these dataset are used in your research (references at the end).**</mark>
 
 1. Initialize the **dataspecs.py** as follows. Non existing directories will be automatically created in the first run.
 ```python
