@@ -1,4 +1,4 @@
-## This is a working example of [**Qu**ick **N**eural **N**etwork **E**xperimentation (QueNN)](https://github.com/sraashis/quenn). It consist of two optical image datasets. We have shown a per-data experiment setup, and pooled version of all datasets.
+## This is a working example of [easytorch](https://github.com/sraashis/easytorch). A quick and easy way to run pytorch based neural network experiments. This example , consist of retinal blood vessel segmentation on two datasets. We have shown a per-data experiment setup, and pooled version of all datasets.
 
 1. Initialize the **dataspecs.py** as follows. Non existing directories will be automatically created in the first run.
 ```python
@@ -29,16 +29,16 @@ AV_WIDE = {
 * **label_getter** is a function that gets corresponding ground truth of an image/data-point from **label_dir**.
 * **mask_getter** is a function that gets corresponding mask of an image/data-point from **mask_dir**.
 
-##### Please check [Our rich argument parser](https://github.com/sraashis/quenn/blob/master/quenn/utils/defaultargs.py)
+##### Please check [Our rich argument parser](https://github.com/sraashis/easytorch/blob/master/easytorch/utils/defaultargs.py)
 * One of the arguments is -data/--dataset_dir which points to the root directory of the dataset. 
 * So the program looks for an image say. image_001.png in dataset_dir/data_dir/images/image_001.png.
-* [Example](https://github.com/sraashis/quenn/tree/master/example) AV-WIDE dataset has the following structure:
+* [Example](https://github.com/sraashis/easytorch/tree/master/example) AV-WIDE dataset has the following structure:
     * datasets/AV-WIDE/images/
     * datasets/AV-WIDE/manual (segmentation ground truth)
     * datasets/AV-WIDE/splits
 * **splits** directory should consist **k** splits for k-fold cross validation. 
 * **splits** are json files that determines which files are for test, validation , and for test.
-* We have a [K-folds creater utility](https://github.com/sraashis/quenn/blob/master/quenn/utils/datautils.py) to generate such folds. So, at the moment a user have to use it to create the splits and place them in splits directory.
+* We have a [K-folds creater utility](https://github.com/sraashis/easytorch/blob/master/easytorch/utils/datautils.py) to generate such folds. So, at the moment a user have to use it to create the splits and place them in splits directory.
 * This is super helpful when working with cloud deployment/ or google colab. 
 
 2. Override our custom dataloader(**QNDataset**) and implement each item parser as in the example.
@@ -48,8 +48,8 @@ AV_WIDE = {
 import argparse
 
 import dataspecs as dspec
-from quenn.utils.defaultargs import ap
-from quenn.runs import run, pooled_run
+from easytorch.utils.defaultargs import ap
+from easytorch.runs import run, pooled_run
 from classification import MyTrainer, MyDataset
 
 ap = argparse.ArgumentParser(parents=[ap], add_help=False)
