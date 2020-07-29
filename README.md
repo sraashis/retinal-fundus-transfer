@@ -71,7 +71,25 @@ We would like to highlight a very use full feature called dataset pooling. With 
 * **run** method runs for all dataset separately  at a time.
 * **pooled_run** pools all the dataset and runs experiments like in the example where we combine two datasets **[dspec.DRIVE, dspec.STARE]** internally creating a larger unified dataset and training on that.
 
-**Fundus images/masks used in example are from the following datasets. Whereas, optic disc ground truth are product of our work (Optical Disc Segmentation using Disk Centered Patch Augmentation):**
+1. DRIVE dataset logs.
+    * Training log
+        ![DRIVE training log](net_logs/DRIVE/DRIVE_training_log.png)
+    * Validation log
+        ![DRIVE training log](net_logs/DRIVE/DRIVE_validation_log.png)
+
+2. We ran 5-fold cross validation for STARE dataset. The following are logs of the first fold.
+    * Training log
+        ![STARE fold_0 training log](net_logs/STARE/STARE_0_training_log.png)
+    * Validation log
+        ![STARE fold_0 validation log](net_logs/STARE/STARE_0_training_log.png)
+
+3. Pooled version
+    * Training log
+        ![Pooled training log](net_logs/pooled/pooled_training_log.png)
+    * Validation log
+        ![Pooled validation log](net_logs/pooled/pooled_validation_log.png)
+        
+## References
 1. DRIVE Dataset, J. Staal, M. Abramoff, M. Niemeijer, M. Viergever, and B. van Ginneken, “Ridge based vessel segmentation in color images of the retina,” IEEE Transactions on Medical Imaging 23, 501–509 (2004)
 2. STARE Dataset, A. D. Hoover, V. Kouznetsova, and M. Goldbaum, “Locating blood vessels in retinal images by piecewise threshold
        probing of a matched filter response,” IEEE Transactions on Med. Imaging 19, 203–210 (2000)
