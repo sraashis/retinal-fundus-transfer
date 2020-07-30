@@ -69,7 +69,7 @@ if __name__ == "__main__":
 ##### Parameters used in **Training+Validation+Test**
     * $python main.py -p train -nch 1 -e 21 -b 8 -sp True -mxp True -r 1
 ##### To run **Only Test**
-    * $python main.py -p test -nch 3 -e 3 -b 2 -sp True
+    * $python main.py -p test -nch 1 -e 21 -b 8 -sp True
 
 We would like to highlight a very use full feature called dataset pooling. With such, one can easily run experiments by combining any number of datasets as :
 * For that, we only need to write dataspecs.py for the dataset we want to pool.
