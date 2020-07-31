@@ -28,24 +28,15 @@ STARE = {
 }
 
 ```
+* **name** Unique name for each specification used.
 * **data_dir** is the path to images/or any data points.
 * **label_dir** is the path to ground truth.
 * **mask_dir** is the path to masks if any.
 * **label_getter** is a function that gets corresponding ground truth of an image/data-point from **label_dir**.
 * **mask_getter** is a function that gets corresponding mask of an image/data-point from **mask_dir**.
-
-##### Please check [Our rich argument parser](https://github.com/sraashis/easytorch/blob/master/easytorch/utils/defaultargs.py)
-* One of the arguments is -data/--dataset_dir which points to the root directory of the dataset. 
-* So the program looks for an image (say. image_001.png) in dataset_dir/data_dir/images/image_001.png.
-* [Example](https://github.com/sraashis/easytorch/tree/master/example) DRIVE dataset has the following structure:
-    * datasets/DRIVE/images/
-    * datasets/DRIVE/manual (segmentation ground truth)
-    * datasets/DRIVE/splits
-    * datasets/DRIVE/masks
-* This helps to work with google colab. You could upload the dataset folder to google drive, and pass in the path to that folder(in google colab notebook) as -data argument.
 * **splits** directory should consist **k** splits for k-fold cross validation. 
-* **splits** are json files that determines which files are for test, validation , and for test.
-* We have a [K-folds creater utility](https://github.com/sraashis/easytorch/blob/master/easytorch/utils/datautils.py) to generate such folds. So, at the moment a user have to use it to create the splits and place them in splits directory.
+* **splits** are json files that specifies which files/images to use for train, validation ,and test.
+* We have a [K-folds creater utility](https://github.com/sraashis/easytorch/blob/master/easytorch/utils/datautils.py) to generate such folds. At the moment, user have to use this utility to create the splits and place them in splits directory.
 
 2. Override our custom dataloader(**ETDataset**) and implement each item parser as in the example.
 3. Initialize our custom neural network trainer(**ETTrainer**) and implement logic for one iteration, how to save prediction scores. Sometimes we want to save predictions as images and all so it is necessary. Initialize log headers. More in example.
@@ -75,13 +66,16 @@ if __name__ == "__main__":
 ##### To run **Only Test**
     * $python main.py -p test -nch 1 -e 21 -b 8 -sp True
 
-We would like to highlight a very use full feature called dataset pooling. With such, one can easily run experiments by combining any number of datasets as :
-* For that, we only need to write dataspecs.py for the dataset we want to pool.
-* **run** method runs for all dataset separately  at a time.
-* **pooled_run** pools all the dataset and runs experiments like in the example where we combine two datasets **[dspec.DRIVE, dspec.STARE]** internally creating a larger unified dataset and training on that.
 ### Results for DRIVE, STARE and pooled are in net_logs folder
 * It should be trained more epochs to gets state of the art result. 
 * Pretrained weights are not uploaded because of space issues.
+
+### Dataset pooling
+It is an useful feature that can combine datasets without moving the datasets from their original locations, and feed to the network as if we are training on one large dataset. Here, in this example we have ran the following experiments:
+* Train one model on DRIVE dataset with single train, validation, and test split.
+* Train 5-models on STARE datasets with 5-fold split(5 fold cross-validation).
+* Train one model on conbination of one DRIVE split, and one STARE split.
+* At the moment, the pool only has capability to combine one split of each dataset. In case there are multiple in the splits directory, it will pick the first one.
 
 1. DRIVE dataset logs.
     * Training log
