@@ -1,13 +1,14 @@
 import argparse
-
-import dataspecs as dspec
 from easytorch.utils.defaultargs import ap
-from easytorch.runs import run, pooled_run
+import dataspecs as dspec
+
+from easytorch import EasyTorch
 from classification import MyTrainer, MyDataset
 
 ap = argparse.ArgumentParser(parents=[ap], add_help=False)
+dataspecs = [dspec.DRIVE, dspec.STARE]
+runner = EasyTorch(ap, dataspecs)
 
-dataspecs = [dspec.STARE, dspec.DRIVE]
 if __name__ == "__main__":
-    run(ap, dataspecs, MyDataset, MyTrainer)
-    pooled_run(ap, dataspecs, MyDataset, MyTrainer)
+    runner.run(MyDataset, MyTrainer)
+    runner.run_pooled(MyDataset, MyTrainer)

@@ -83,3 +83,9 @@ class UNet(nn.Module):
             c = (bypass.size()[2] - upsampled.size()[2]) // 2
             bypass = F.pad(bypass, (-c, -c, -c, -c))
         return torch.cat((upsampled, bypass), 1)
+
+
+m = UNet(1, 2, 4)
+import json
+import torch
+adam = torch.optim.Adam(m.parameters(), lr=0.01)

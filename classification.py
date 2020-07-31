@@ -6,10 +6,10 @@ import torch
 import torch.nn.functional as F
 import torchvision.transforms as tmf
 from PIL import Image as IMG
-
-from easytorch.utils.imageutils import (Image, get_chunk_indexes, expand_and_mirror_patch, merge_patches)
 from easytorch.core.measurements import Avg, Prf1a
 from easytorch.core.nn import ETTrainer, ETDataset
+from easytorch.utils.imageutils import (Image, get_chunk_indexes, expand_and_mirror_patch, merge_patches)
+
 from models import UNet
 
 sep = os.sep
@@ -25,7 +25,7 @@ class MyDataset(ETDataset):
         self.image_objs = {}
 
     def load_index(self, map_id, file):
-        dt = self.dmap[map_id]
+        dt = self.dataspecs[map_id]
         img_obj = Image()
         img_obj.load(dt['data_dir'], file)
         img_obj.load_ground_truth(dt['label_dir'], dt['label_getter'])
@@ -66,7 +66,7 @@ class MyTrainer(ETTrainer):
     def __init__(self, args):
         super().__init__(args)
 
-    def _init_nn(self):
+    def _init_nn_model(self):
         self.nn['model'] = UNet(self.args['num_channel'], self.args['num_class'], reduce_by=self.args['model_scale'])
 
     def iteration(self, batch):
@@ -89,7 +89,7 @@ class MyTrainer(ETTrainer):
     def save_predictions(self, dataset, accumulator):
         """load_sparse option in default params loads patches of single image in one dataloader.
          This enables to merge them safely to form the whole image """
-        dataset_name = list(dataset.dmap.keys())[0]
+        dataset_name = list(dataset.dataspecs.keys())[0]
         file = list(dataset.image_objs.values())[0].file
         img_shape = dataset.image_objs[file].array.shape
 
@@ -114,4 +114,3 @@ class MyTrainer(ETTrainer):
         self.cache['training_log'] = ['Loss,Precision,Recall,F1,Accuracy']
         self.cache['validation_log'] = ['Loss,Precision,Recall,F1,Accuracy']
         self.cache['test_score'] = ['Split,Precision,Recall,F1,Accuracy']
-        self.cache['best_score'] = 0.0

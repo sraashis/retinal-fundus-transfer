@@ -12,6 +12,7 @@ import os
 
 sep = os.sep
 DRIVE = {
+    'name': 'DRIVE',
     'data_dir': 'DRIVE' + sep + 'images',
     'label_dir': 'DRIVE' + sep + 'manual',
     'split_dir': 'DRIVE' + sep + 'splits',
@@ -19,6 +20,7 @@ DRIVE = {
     'mask_getter': lambda file_name: file_name.split('_')[0] + '_mask.gif'
 }
 STARE = {
+    'name': 'STARE',
     'data_dir': 'STARE' + sep + 'stare-images',
     'label_dir': 'STARE' + sep + 'labels-ah',
     'split_dir': 'STARE' + sep + 'splits',
@@ -51,18 +53,20 @@ STARE = {
 
 ```python
 import argparse
-
-import dataspecs as dspec
 from easytorch.utils.defaultargs import ap
-from easytorch.runs import run, pooled_run
+import dataspecs as dspec
+
+from easytorch import EasyTorch
 from classification import MyTrainer, MyDataset
 
 ap = argparse.ArgumentParser(parents=[ap], add_help=False)
-
 dataspecs = [dspec.DRIVE, dspec.STARE]
+runner = EasyTorch(ap, dataspecs)
+
 if __name__ == "__main__":
-    run(ap, dataspecs, MyTrainer, MyDataset)
-    pooled_run(ap, dataspecs, MyTrainer, MyDataset)
+    runner.run(MyDataset, MyTrainer)
+    runner.run_pooled(MyDataset, MyTrainer)
+
 ```
 ### Finally Run:
 
