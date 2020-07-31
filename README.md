@@ -71,7 +71,7 @@ if __name__ == "__main__":
 * Pretrained weights are not uploaded because of space issues.
 
 ### Dataset pooling
-It is an useful feature that can combine datasets without moving the datasets from their original locations, and feed to the network as if we are training on one large dataset. Here, in this example we have ran the following experiments:
+It is an useful feature that can combine datasets without moving the datasets from their original locations, and feed to the network as if we are training on one large dataset. In this example, we have ran the following experiments:
 * Train one model on DRIVE dataset with single train, validation, and test split.
 * Train 5-models on STARE datasets with 5-fold split(5 fold cross-validation).
 * Train one model on conbination of one DRIVE split, and one STARE split.
