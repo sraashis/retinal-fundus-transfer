@@ -86,7 +86,7 @@ class MyTrainer(ETTrainer):
 
         return {'loss': loss, 'avg_loss': avg, 'output': out, 'scores': sc, 'predictions': pred}
 
-    def save_predictions(self, dataset, accumulator):
+    def save_predictions(self, dataset, its):
         """load_sparse option in default params loads patches of single image in one dataloader.
          This enables to merge them safely to form the whole image """
         dataset_name = list(dataset.dataspecs.keys())[0]
@@ -94,7 +94,7 @@ class MyTrainer(ETTrainer):
         img_shape = dataset.image_objs[file].array.shape
 
         patches = []
-        for batch, it in accumulator:
+        for it in its:
             patches.append(it["output"][:, 1, :, :])
 
         patches = torch.cat(patches, 0).cpu().numpy() * 255
