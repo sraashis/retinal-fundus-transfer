@@ -34,9 +34,7 @@ STARE = {
 * **mask_dir** is the path to masks if any.
 * **label_getter** is a function that gets corresponding ground truth of an image/data-point from **label_dir**.
 * **mask_getter** is a function that gets corresponding mask of an image/data-point from **mask_dir**.
-* **splits** directory should consist **k** splits for k-fold cross validation. 
-* **splits** are json files that specifies which files/images to use for train, validation ,and test.
-* We have a [K-folds creater utility](https://github.com/sraashis/easytorch/blob/master/easytorch/utils/datautils.py) to generate such folds. At the moment, user have to use this utility to create the splits and place them in splits directory.
+* **splits** (optional) directory should consist train-validation-test split as a json files with the same keys. If no splits are provided, splits are created based on value on -nf/--num_folds(number of folds in k-fold cross validation/default k=10) automatically.
 
 2. Override our custom dataloader(**ETDataset**) and implement each item parser as in the example.
 3. Initialize our custom neural network trainer(**ETTrainer**) and implement logic for one iteration, how to save prediction scores. Sometimes we want to save predictions as images and all so it is necessary. Initialize log headers. More in example.
