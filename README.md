@@ -57,7 +57,7 @@ if __name__ == "__main__":
     runner.run_pooled(MyDataset, MyTrainer)
 
 ```
-### Finally Run:
+### Finally, Start training:
 
 ##### Parameters used in **Training+Validation+Test**
     * $python main.py -p train -nch 1 -e 21 -b 8 -sp True -mxp True -r 1
