@@ -1,11 +1,13 @@
 #### This is a working example of [easytorch](https://github.com/sraashis/easytorch). A quick and easy way to run pytorch based neural network experiments. 
- * This example consist of retinal blood vessel segmentation on two datasets- DRIVE<sub>[1]</sub>, and STARE<sub>[2]</sub>. 
+* This example consist of retinal blood vessel segmentation on two datasets- DRIVE<sub>[1]</sub>, and STARE<sub>[2]</sub>. 
 * We have shown a per-data experiment setup, and pooled version of all datasets in this repo. Please check net_logs folder for results.
 
 **``
 Please note that one MUST cite the original authors if these dataset are used in your research (references at the end)
 ``**
 
+- **Install pytorch and torchvision from [official website](https://pytorch.org/)**
+- **pip install easytorch**
 1. Initialize the **dataspecs.py** as follows. Non existing directories will be automatically created in the first run.
 ```python
 import os
