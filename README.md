@@ -62,13 +62,12 @@ if __name__ == "__main__":
 ### Finally, Start training:
 
 ##### Parameters used in **Training+Validation+Test**
-    * $python main.py -p train -nch 1 -e 21 -b 8 -sp True -mxp True -r 1
+    * $python main.py -p train -nch 1 -e 21 -b 8 -sp True -r 1
 ##### To run **Only Test**
-    * $python main.py -p test -nch 1 -e 21 -b 8 -sp True
+    * $python main.py -p test -nch 1 -e 21 -b 8 -sp True -r 1
 
 ### Results for DRIVE, STARE and pooled are in net_logs folder
 * It should be trained more epochs to gets state of the art result. 
-* Pretrained weights are not uploaded because of space issues.
 
 ### Dataset pooling
 It is an useful feature that can combine datasets without moving the datasets from their original locations, and feed to the network as if we are training on one large dataset. In this example, we have ran the following experiments:
