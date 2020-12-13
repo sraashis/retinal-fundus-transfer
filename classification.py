@@ -6,7 +6,8 @@ import torch
 import torch.nn.functional as F
 import torchvision.transforms as tmf
 from PIL import Image as IMG
-from easytorch.core.measurements import Avg, Prf1a
+from easytorch.core.metrics import ETAverages
+from easytorch.utils.measurements import Prf1a
 from easytorch.core.nn import ETTrainer, ETDataset
 from easytorch.utils.imageutils import (Image, get_chunk_indexes, expand_and_mirror_patch, merge_patches)
 
@@ -24,8 +25,8 @@ class MyDataset(ETDataset):
         self.expand_by = (184, 184)
         self.image_objs = {}
 
-    def load_index(self, map_id, file):
-        dt = self.dataspecs[map_id]
+    def load_index(self, dataset_name, file):
+        dt = self.dataspecs[dataset_name]
         img_obj = Image()
         img_obj.load(dt['data_dir'], file)
         img_obj.load_ground_truth(dt['label_dir'], dt['label_getter'])
@@ -33,7 +34,7 @@ class MyDataset(ETDataset):
         img_obj.array = img_obj.array[:, :, 1]
         self.image_objs[file] = img_obj
         for corners in get_chunk_indexes(img_obj.array.shape, self.patch_shape, self.patch_offset):
-            self.indices.append([map_id, file] + corners)
+            self.indices.append([dataset_name, file] + corners)
 
     def __getitem__(self, index):
         map_id, file, row_from, row_to, col_from, col_to = self.indices[index]
@@ -81,10 +82,10 @@ class MyTrainer(ETTrainer):
         sc = self.new_metrics()
         sc.add(pred, labels)
 
-        avg = Avg()
+        avg = self.new_averages()
         avg.add(loss.item(), len(inputs))
 
-        return {'loss': loss, 'avg_loss': avg, 'output': out, 'scores': sc, 'predictions': pred}
+        return {'loss': loss, 'averages': avg, 'output': out, 'metrics': sc, 'predictions': pred}
 
     def save_predictions(self, dataset, its):
         """load_sparse option in default params loads patches of single image in one dataloader.
@@ -105,10 +106,13 @@ class MyTrainer(ETTrainer):
     def new_metrics(self):
         return Prf1a()
 
+    def new_averages(self):
+        return ETAverages(num_averages=1)
+
     def reset_dataset_cache(self):
         self.cache['global_test_score'] = []
-        self.cache['monitor_metrics'] = 'f1'
-        self.cache['score_direction'] = 'maximize'
+        self.cache['monitor_metric'] = 'f1'
+        self.cache['metric_direction'] = 'maximize'
 
     def reset_fold_cache(self):
         self.cache['training_log'] = ['Loss,Precision,Recall,F1,Accuracy']

@@ -76,35 +76,27 @@ It is an useful feature that can combine datasets without moving the datasets fr
 * Train one model on conbination of one DRIVE split, and one STARE split.
 * At the moment, the pool only has capability to combine one split of each dataset. In case there are multiple in the splits directory, it will pick the first one.
 
-1. DRIVE dataset logs.
+1. DRIVE dataset logs example.
     * Training log
-        ![DRIVE training log](net_logs/DRIVE/DRIVE_training_log.png)
+        ![DRIVE training log](net_logs/DRIVE/SPLIT_1_training_log.png)
     * Validation log
-        ![DRIVE training log](net_logs/DRIVE/DRIVE_validation_log.png)
-
-2. We ran 5-fold cross validation for STARE dataset. The following are logs of the first fold.
-    * Scores for each folds, and global(combining all folds) in net_logs/STARE/_global_test_scores.csv
-    
-            |Fold                |Precision|REcall|F1    |Accuracy|
-            |--------------------|---------|------|------|--------|
-            |STARE_0.json        |0.8869   |0.6588|0.756 |0.9612  |
-            |STARE_1.json        |0.8273   |0.8144|0.8208|0.975   |
-            |STARE_4.json        |0.7509   |0.8309|0.7889|0.9682  |
-            |STARE_3.json        |0.7945   |0.7675|0.7808|0.9643  |
-            |STARE_2.json        |0.8663   |0.8235|0.8444|0.9731  |
-            |Global              |0.8237   |0.7745|0.7983|0.9684  |
-
-    * Training log
-        ![STARE fold_0 training log](net_logs/STARE/STARE_0_training_log.png)
-    * Validation log
-        ![STARE fold_0 validation log](net_logs/STARE/STARE_0_training_log.png)
-
-3. Pooled version
-    * Training log
-        ![Pooled training log](net_logs/pooled/pooled_training_log.png)
-    * Validation log
-        ![Pooled validation log](net_logs/pooled/pooled_validation_log.png)
-        
+        ![DRIVE training log](net_logs/DRIVE/SPLIT_1_validation_log.png)
+      
+### Test Scores
+|Fold|Precision|Recall|F1|Accuracy|
+|------------|-------|-------|-------|-------|
+|SPLIT_2.json|0.8481 |0.80524|0.82611|0.96693|
+|SPLIT_8.json|0.83081|0.76595|0.79706|0.96111|
+|SPLIT_7.json|0.79472|0.81938|0.80686|0.96407|
+|SPLIT_6.json|0.8464 |0.7572 |0.79932|0.96361|
+|SPLIT_9.json|0.82199|0.80759|0.81473|0.96407|
+|SPLIT_4.json|0.79218|0.75019|0.77061|0.95209|
+|SPLIT_5.json|0.81362|0.80151|0.80752|0.96163|
+|SPLIT_0.json|0.81717|0.78315|0.7998 |0.96122|
+|SPLIT_1.json|0.80873|0.79497|0.80179|0.96063|
+|SPLIT_3.json|0.8135 |0.78912|0.80112|0.96301|
+|Global      |0.81813|0.78694|0.80223|0.96184|
+      
 ## References
 1. DRIVE Dataset, J. Staal, M. Abramoff, M. Niemeijer, M. Viergever, and B. van Ginneken, “Ridge based vessel segmentation in color images of the retina,” IEEE Transactions on Medical Imaging 23, 501–509 (2004)
 2. STARE Dataset, A. D. Hoover, V. Kouznetsova, and M. Goldbaum, “Locating blood vessels in retinal images by piecewise threshold
