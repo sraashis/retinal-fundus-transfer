@@ -1,10 +1,4 @@
-#### This is a working example of [easytorch](https://github.com/sraashis/easytorch). A quick and easy way to run pytorch based neural network experiments. 
-* This example consist of retinal blood vessel segmentation on two datasets- DRIVE<sub>[1]</sub>, and STARE<sub>[2]</sub>. 
-* We have shown a per-data experiment setup, and pooled version of all datasets in this repo. Please check net_logs folder for results.
-
-**``
-Please note that one MUST cite the original authors if these dataset are used in your research (references at the end)
-``**
+### This example consist of retinal blood vessel segmentation on two datasets- DRIVE<sub>[1]</sub>, and STARE<sub>[2]</sub> using  [easytorch](https://github.com/sraashis/easytorch) frameowork.
 
 - **Install pytorch and torchvision from [official website](https://pytorch.org/)**
 - **pip install easytorch**
@@ -96,7 +90,11 @@ It is an useful feature that can combine datasets without moving the datasets fr
 |SPLIT_1.json|0.80873|0.79497|0.80179|0.96063|
 |SPLIT_3.json|0.8135 |0.78912|0.80112|0.96301|
 |Global      |0.81813|0.78694|0.80223|0.96184|
-      
+
+**``
+Please note that one MUST cite the original authors if these dataset are used in your research (references at the end)
+``**
+
 ## References
 1. DRIVE Dataset, J. Staal, M. Abramoff, M. Niemeijer, M. Viergever, and B. van Ginneken, “Ridge based vessel segmentation in color images of the retina,” IEEE Transactions on Medical Imaging 23, 501–509 (2004)
 2. STARE Dataset, A. D. Hoover, V. Kouznetsova, and M. Goldbaum, “Locating blood vessels in retinal images by piecewise threshold

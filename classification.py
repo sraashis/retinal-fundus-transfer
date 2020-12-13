@@ -18,6 +18,9 @@ sep = os.sep
 
 class MyDataset(ETDataset):
     def __init__(self, **kw):
+        r"""
+        Initialize necessary shapes for unet.
+        """
         super().__init__(**kw)
         self.patch_shape = (388, 388)
         self.patch_offset = (200, 200)
@@ -26,6 +29,13 @@ class MyDataset(ETDataset):
         self.image_objs = {}
 
     def load_index(self, dataset_name, file):
+        r"""
+        :param dataset_name: name of teh dataset as provided in dataspecs
+        :param file: Name of an image
+        :return:
+        Logic split an image to patches and feed to U-Net. Meancwhile we need to store the four-corners
+            of each patch so that we can rejoin the full image from the patches' corresponding predictions.
+        """
         dt = self.dataspecs[dataset_name]
         img_obj = Image()
         img_obj.load(dt['data_dir'], file)
@@ -34,9 +44,18 @@ class MyDataset(ETDataset):
         img_obj.array = img_obj.array[:, :, 1]
         self.image_objs[file] = img_obj
         for corners in get_chunk_indexes(img_obj.array.shape, self.patch_shape, self.patch_offset):
+            """
+            get_chunk_indexes will return the list of four corners of all patches of the images  
+            by using window size of self.patch_shape, and offset  of elf.patch_offset
+            """
             self.indices.append([dataset_name, file] + corners)
 
     def __getitem__(self, index):
+        """
+        :param index:
+        :return: dict with keys - indices, input, label
+            We need indices to get the file name to save the respective predictions.
+        """
         map_id, file, row_from, row_to, col_from, col_to = self.indices[index]
 
         img = self.image_objs[file].array
@@ -71,6 +90,10 @@ class MyTrainer(ETTrainer):
         self.nn['model'] = UNet(self.args['num_channel'], self.args['num_class'], reduce_by=self.args['model_scale'])
 
     def iteration(self, batch):
+        r"""
+        :param batch:
+        :return: dict with keys - loss(computation graph), averages, output, metrics, predictions
+        """
         inputs = batch['input'].to(self.nn['device']).float()
         labels = batch['label'].to(self.nn['device']).long()
 
@@ -94,6 +117,8 @@ class MyTrainer(ETTrainer):
         file = list(dataset.image_objs.values())[0].file
         img_shape = dataset.image_objs[file].array.shape
 
+        """
+        Loop over and gather all the predicted patches of one image and merge together"""
         patches = []
         for it in its:
             patches.append(it["output"][:, 1, :, :])
@@ -104,17 +129,35 @@ class MyTrainer(ETTrainer):
         IMG.fromarray(img).save(self.cache['log_dir'] + sep + dataset_name + '_' + file + '.png')
 
     def new_metrics(self):
+        r"""
+        :return: child class of easytorch.core.metrics.ETMetrics()
+        Prf1a() has the functionality to calculate precision, recall, F1 score, accuracy.. given two tensors.
+        """
         return Prf1a()
 
     def new_averages(self):
+        r"""
+        :return: ETAverages(..) which keep tracks of averages.
+        In our case we only have single loss in our training.
+        """
         return ETAverages(num_averages=1)
 
     def reset_dataset_cache(self):
+        r"""
+        Prepare/initialize cache for each datasets.
+        :return:
+        """
         self.cache['global_test_score'] = []
         self.cache['monitor_metric'] = 'f1'
         self.cache['metric_direction'] = 'maximize'
 
     def reset_fold_cache(self):
+        r"""
+        Prepare/initialize cache for each folds. A datasets will have k-folds, thus k-plots, k-models.
+        However, there will only be one test scores for the entire datasets, We gather the scores (TP, FP, FN, TN)
+        of all folds and calculate global test score for each datasets.
+        :return:
+        """
         self.cache['training_log'] = ['Loss,Precision,Recall,F1,Accuracy']
         self.cache['validation_log'] = ['Loss,Precision,Recall,F1,Accuracy']
         self.cache['test_score'] = ['Split,Precision,Recall,F1,Accuracy']

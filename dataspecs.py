@@ -1,3 +1,9 @@
+r"""
+A data specification file where we specify the structure of datasets we use.
+- Any directories should have _dir in the key.
+- Each dataset must have a unique name.
+"""
+
 import os
 
 sep = os.sep
