@@ -39,7 +39,7 @@ STARE = {
 * **splits** (optional) directory should consist train-validation-test split as a json files with the same keys. If no splits are provided, splits are created based on value on -nf/--num_folds(number of folds in k-fold cross validation/default k=10) automatically.
 
 2. Override our custom dataloader(**ETDataset**) and implement each item parser as in the example.
-3. Initialize our custom neural network trainer(**ETTrainer**) and implement logic for one iteration, how to save prediction scores. Sometimes we want to save predictions as images and all so it is necessary. Initialize log headers. More in [classification.py](https://github.com/sraashis/easytorchexample/blob/master/classification.py).
+3. Initialize our custom neural network trainer(**ETTrainer**) and implement logic for one iteration, how to save prediction scores. Sometimes we want to save predictions as images and all so it is necessary. Initialize log headers. More in [classification.py](https://github.com/sraashis/unet-vessel-segmentation-easytorch/blob/master/classification.py).
 4. Implement the entry point
 
 ```python
