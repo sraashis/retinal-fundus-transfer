@@ -1,0 +1,2 @@
+Split,Precision,Recall,F1,Accuracy
+SPLIT_5.json,0.81362,0.80151,0.80752,0.96163
