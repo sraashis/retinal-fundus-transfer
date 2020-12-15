@@ -56,9 +56,9 @@ if __name__ == "__main__":
 ### Finally, Start training:
 
 ##### Parameters used in **Training+Validation+Test**
-    * $python main.py -p train -nch 1 -e 21 -b 8 -sp True -r 1
+    * $python main.py -ph train -nch 1 -e 21 -b 8 -lsp True -r 1
 ##### To run **Only Test**
-    * $python main.py -p test -nch 1 -e 21 -b 8 -sp True -r 1
+    * $python main.py -ph test -nch 1 -e 21 -b 8 -lsp True -r 1
 
 ### Results for DRIVE, STARE and pooled are in net_logs folder
 * It should be trained more epochs to gets state of the art result. 
