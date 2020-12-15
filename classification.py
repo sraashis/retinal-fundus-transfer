@@ -94,8 +94,8 @@ class MyTrainer(ETTrainer):
         :param batch:
         :return: dict with keys - loss(computation graph), averages, output, metrics, predictions
         """
-        inputs = batch['input'].to(self.nn['device']).float()
-        labels = batch['label'].to(self.nn['device']).long()
+        inputs = batch['input'].to(self.device['gpu']).float()
+        labels = batch['label'].to(self.device['gpu']).long()
 
         out = self.nn['model'](inputs)
         loss = F.cross_entropy(out, labels)
