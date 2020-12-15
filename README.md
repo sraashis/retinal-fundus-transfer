@@ -11,7 +11,6 @@ DRIVE = {
     'name': 'DRIVE',
     'data_dir': 'DRIVE' + sep + 'images',
     'label_dir': 'DRIVE' + sep + 'manual',
-    'split_dir': 'DRIVE' + sep + 'splits',
     'label_getter': lambda file_name: file_name.split('_')[0] + '_manual1.gif',
     'mask_getter': lambda file_name: file_name.split('_')[0] + '_mask.gif'
 }
@@ -19,7 +18,6 @@ STARE = {
     'name': 'STARE',
     'data_dir': 'STARE' + sep + 'stare-images',
     'label_dir': 'STARE' + sep + 'labels-ah',
-    'split_dir': 'STARE' + sep + 'splits',
     'label_getter': lambda file_name: file_name.split('.')[0] + '.ah.pgm',
 }
 
@@ -27,14 +25,102 @@ STARE = {
 * **name** Unique name for each specification used.
 * **data_dir** is the path to images/or any data points.
 * **label_dir** is the path to ground truth.
-* **mask_dir** is the path to masks if any.
 * **label_getter** is a function that gets corresponding ground truth of an image/data-point from **label_dir**.
 * **mask_getter** is a function that gets corresponding mask of an image/data-point from **mask_dir**.
-* **splits** (optional) directory should consist train-validation-test split as a json files with the same keys. If no splits are provided, splits are created based on value on -nf/--num_folds(number of folds in k-fold cross validation/default k=10) automatically.
 
-2. Override our custom dataloader(**ETDataset**) and implement each item parser as in the example.
-3. Initialize our custom neural network trainer(**ETTrainer**) and implement logic for one iteration, how to save prediction scores. Sometimes we want to save predictions as images and all so it is necessary. Initialize log headers. More in [classification.py](https://github.com/sraashis/unet-vessel-segmentation-easytorch/blob/master/classification.py).
-4. Implement the entry point
+```python
+import torchvision.transforms as tmf
+from easytorch.core.nn import ETTrainer, ETDataset
+from easytorch.utils.imageutils import (Image, get_chunk_indexes, expand_and_mirror_patch, merge_patches)
+
+class MyDataset(ETDataset):
+    def __init__(self, **kw):
+        r"""
+        Initialize necessary shapes for unet.
+        """
+        super().__init__(**kw)
+        self.patch_shape = (388, 388)
+        self.patch_offset = (200, 200)
+        self.input_shape = (572, 572)
+        self.expand_by = (184, 184)
+        self.image_objs = {}
+
+    def load_index(self, dataset_name, file):
+        r"""
+        :param dataset_name: name of teh dataset as provided in dataspecs
+        :param file: Name of an image
+        :return:
+        Logic split an image to patches and feed to U-Net. Meancwhile we need to store the four-corners
+            of each patch so that we can rejoin the full image from the patches' corresponding predictions.
+        """
+        dt = self.dataspecs[dataset_name]
+        img_obj = Image()
+        img_obj.load(dt['data_dir'], file)
+        img_obj.load_ground_truth(dt['label_dir'], dt['label_getter'])
+        img_obj.apply_clahe()
+        img_obj.array = img_obj.array[:, :, 1]
+        self.image_objs[file] = img_obj
+        for corners in get_chunk_indexes(img_obj.array.shape, self.patch_shape, self.patch_offset):
+            """
+            get_chunk_indexes will return the list of four corners of all patches of the images  
+            by using window size of self.patch_shape, and offset  of elf.patch_offset
+            """
+            self.indices.append([dataset_name, file] + corners)
+
+    def __getitem__(self, index):
+        """
+        :param index:
+        :return: dict with keys - indices, input, label
+            We need indices to get the file name to save the respective predictions.
+        """
+        map_id, file, row_from, row_to, col_from, col_to = self.indices[index]
+
+        img = self.image_objs[file].array
+        gt = self.image_objs[file].ground_truth[row_from:row_to, col_from:col_to]
+
+        p, q, r, s, pad = expand_and_mirror_patch(img.shape, [row_from, row_to, col_from, col_to], self.expand_by)
+        img = np.pad(img[p:q, r:s], pad, 'reflect')
+
+        #  Random  flips
+        if self.mode == 'train' and random.uniform(0, 1) <= 0.5:
+            img = np.flip(img, 0)
+            gt = np.flip(gt, 0)
+
+        if self.mode == 'train' and random.uniform(0, 1) <= 0.5:
+            img = np.flip(img, 1)
+            gt = np.flip(gt, 1)
+
+        img = self.transforms(img)
+        gt = self.transforms(gt)
+        return {'indices': self.indices[index], 'input': img, 'label': gt.squeeze()}
+
+    @property
+    def transforms(self):
+        return tmf.Compose(
+            [tmf.ToPILImage(), tmf.ToTensor()])
+```
+
+### Implement how to save segmentation results in the class that extends ETTrainer:
+```python
+   def save_predictions(self, dataset, its):
+        """load_sparse option in default params loads patches of single image in one dataloader.
+         This enables to merge them safely to form the whole image """
+        dataset_name = list(dataset.dataspecs.keys())[0]
+        file = list(dataset.image_objs.values())[0].file
+        img_shape = dataset.image_objs[file].array.shape
+
+        """
+        Loop over and gather all the predicted patches of one image and merge together"""
+        patches = []
+        for it in its:
+            patches.append(it["output"][:, 1, :, :])
+
+        patches = torch.cat(patches, 0).cpu().numpy() * 255
+        patches = patches.astype(np.uint8)
+        # merge patches to form the whole image.
+        img = merge_patches(patches, img_shape, dataset.patch_shape, dataset.patch_offset)
+        IMG.fromarray(img).save(self.cache['log_dir'] + sep + dataset_name + '_' + file + '.png')
+```
 
 ```python
 import argparse
@@ -53,9 +139,8 @@ if __name__ == "__main__":
     runner.run_pooled(MyDataset, MyTrainer)
 
 ```
-### Finally, Start training:
 
-##### Parameters used in **Training+Validation+Test**
+##### Args used in **Training+Validation+Test**
     * $python main.py -ph train -nch 1 -e 21 -b 8 -lsp True -r 1
 ##### To run **Only Test**
     * $python main.py -ph test -nch 1 -e 21 -b 8 -lsp True -r 1
@@ -67,9 +152,9 @@ if __name__ == "__main__":
 It is an useful feature that can combine datasets without moving the datasets from their original locations, and feed to the network as if we are training on one large dataset. In this example, we have ran the following experiments:
 * Train one model on DRIVE dataset with single train, validation, and test split.
 * Train 5-models on STARE datasets with 5-fold split(5 fold cross-validation).
-* Train one model on conbination of one DRIVE split, and one STARE split.
-* At the moment, the pool only has capability to combine one split of each dataset. In case there are multiple in the splits directory, it will pick the first one.
+* Train one model by pooling both DRIVE and STARE Datasets without moving data from the original location.
 
+### Generated plots:
 1. DRIVE dataset logs example.
     * Training log
         ![DRIVE training log](net_logs/DRIVE/SPLIT_1_training_log.png)
