@@ -28,10 +28,24 @@ STARE = {
 * **label_getter** is a function that gets corresponding ground truth of an image/data-point from **label_dir**.
 * **mask_getter** is a function that gets corresponding mask of an image/data-point from **mask_dir**.
 
+### Define how to load each image files to feed to the U-Net.
 ```python
+import os
+import random
+
+import numpy as np
+import torch
+import torch.nn.functional as F
 import torchvision.transforms as tmf
-from easytorch.core.nn import ETTrainer, ETDataset
-from easytorch.utils.imageutils import (Image, get_chunk_indexes, expand_and_mirror_patch, merge_patches)
+from PIL import Image as IMG
+from easytorch import ETTrainer
+from easytorch.data import ETDataset
+from easytorch.vision.imageutils import (Image, get_chunk_indexes, expand_and_mirror_patch, merge_patches)
+
+from models import UNet
+
+sep = os.sep
+
 
 class MyDataset(ETDataset):
     def __init__(self, **kw):
@@ -81,7 +95,6 @@ class MyDataset(ETDataset):
         p, q, r, s, pad = expand_and_mirror_patch(img.shape, [row_from, row_to, col_from, col_to], self.expand_by)
         img = np.pad(img[p:q, r:s], pad, 'reflect')
 
-        #  Random  flips
         if self.mode == 'train' and random.uniform(0, 1) <= 0.5:
             img = np.flip(img, 0)
             gt = np.flip(gt, 0)
@@ -98,11 +111,39 @@ class MyDataset(ETDataset):
     def transforms(self):
         return tmf.Compose(
             [tmf.ToPILImage(), tmf.ToTensor()])
-```
 
-### Implement how to save segmentation results in the class that extends ETTrainer:
+```
+### Define iteration and how to save predicted images.
 ```python
-   def save_predictions(self, dataset, its):
+class MyTrainer(ETTrainer):
+    def __init__(self, args):
+        super().__init__(args)
+
+    def _init_nn_model(self):
+        self.nn['model'] = UNet(self.args['num_channel'], self.args['num_class'], reduce_by=self.args['model_scale'])
+
+    def iteration(self, batch):
+        r"""
+        :param batch:
+        :return: dict with keys - loss(computation graph), averages, output, metrics, predictions
+        """
+        inputs = batch['input'].to(self.device['gpu']).float()
+        labels = batch['label'].to(self.device['gpu']).long()
+
+        out = self.nn['model'](inputs)
+        loss = F.cross_entropy(out, labels)
+        out = F.softmax(out, 1)
+
+        _, pred = torch.max(out, 1)
+        sc = self.new_metrics()
+        sc.add(pred, labels)
+
+        avg = self.new_averages()
+        avg.add(loss.item(), len(inputs))
+
+        return {'loss': loss, 'averages': avg, 'output': out, 'metrics': sc, 'predictions': pred}
+
+    def save_predictions(self, dataset, its):
         """load_sparse option in default params loads patches of single image in one dataloader.
          This enables to merge them safely to form the whole image """
         dataset_name = list(dataset.dataspecs.keys())[0]
@@ -117,14 +158,15 @@ class MyDataset(ETDataset):
 
         patches = torch.cat(patches, 0).cpu().numpy() * 255
         patches = patches.astype(np.uint8)
-        # merge patches to form the whole image.
         img = merge_patches(patches, img_shape, dataset.patch_shape, dataset.patch_offset)
         IMG.fromarray(img).save(self.cache['log_dir'] + sep + dataset_name + '_' + file + '.png')
-```
 
+
+```
+### Entry point
 ```python
 import argparse
-from easytorch.utils.defaultargs import ap
+from easytorch.etargs import ap
 import dataspecs as dspec
 
 from easytorch import EasyTorch
@@ -132,11 +174,12 @@ from classification import MyTrainer, MyDataset
 
 ap = argparse.ArgumentParser(parents=[ap], add_help=False)
 dataspecs = [dspec.DRIVE, dspec.STARE]
-runner = EasyTorch(ap, dataspecs)
+runner = EasyTorch(dataspecs, ap)
 
 if __name__ == "__main__":
     runner.run(MyDataset, MyTrainer)
     runner.run_pooled(MyDataset, MyTrainer)
+
 
 ```
 
