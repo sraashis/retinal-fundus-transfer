@@ -6,10 +6,9 @@ import torch
 import torch.nn.functional as F
 import torchvision.transforms as tmf
 from PIL import Image as IMG
-from easytorch.core.metrics import ETAverages
-from easytorch.utils.measurements import Prf1a
-from easytorch.core.nn import ETTrainer, ETDataset
-from easytorch.utils.imageutils import (Image, get_chunk_indexes, expand_and_mirror_patch, merge_patches)
+from easytorch import ETTrainer
+from easytorch.data import ETDataset
+from easytorch.vision.imageutils import (Image, get_chunk_indexes, expand_and_mirror_patch, merge_patches)
 
 from models import UNet
 
@@ -128,36 +127,3 @@ class MyTrainer(ETTrainer):
         img = merge_patches(patches, img_shape, dataset.patch_shape, dataset.patch_offset)
         IMG.fromarray(img).save(self.cache['log_dir'] + sep + dataset_name + '_' + file + '.png')
 
-    def new_metrics(self):
-        r"""
-        :return: child class of easytorch.core.metrics.ETMetrics()
-        Prf1a() has the functionality to calculate precision, recall, F1 score, accuracy.. given two tensors.
-        """
-        return Prf1a()
-
-    def new_averages(self):
-        r"""
-        :return: ETAverages(..) which keep tracks of averages.
-        In our case we only have single loss in our training.
-        """
-        return ETAverages(num_averages=1)
-
-    def reset_dataset_cache(self):
-        r"""
-        Prepare/initialize cache for each datasets.
-        :return:
-        """
-        self.cache['global_test_score'] = []
-        self.cache['monitor_metric'] = 'f1'
-        self.cache['metric_direction'] = 'maximize'
-
-    def reset_fold_cache(self):
-        r"""
-        Prepare/initialize cache for each folds. A datasets will have k-folds, thus k-plots, k-models.
-        However, there will only be one test scores for the entire datasets, We gather the scores (TP, FP, FN, TN)
-        of all folds and calculate global test score for each datasets.
-        :return:
-        """
-        self.cache['training_log'] = ['Loss,Precision,Recall,F1,Accuracy']
-        self.cache['validation_log'] = ['Loss,Precision,Recall,F1,Accuracy']
-        self.cache['test_score'] = ['Split,Precision,Recall,F1,Accuracy']
