@@ -6,9 +6,8 @@ import torch
 import torch.nn.functional as F
 import torchvision.transforms as tmf
 from PIL import Image as IMG
-from easytorch import ETTrainer
-from easytorch.data import ETDataset
-from easytorch.vision.imageutils import (Image, get_chunk_indexes, expand_and_mirror_patch, merge_patches)
+from easytorch import ETTrainer, ETDataset
+from easytorch.vision import (Image, get_chunk_indexes, expand_and_mirror_patch, merge_patches)
 
 from models import UNet
 
