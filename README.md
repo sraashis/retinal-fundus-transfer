@@ -34,18 +34,10 @@ import os
 import random
 
 import numpy as np
-import torch
-import torch.nn.functional as F
 import torchvision.transforms as tmf
-from PIL import Image as IMG
-from easytorch import ETTrainer
-from easytorch.data import ETDataset
-from easytorch.vision.imageutils import (Image, get_chunk_indexes, expand_and_mirror_patch, merge_patches)
-
-from models import UNet
-
+from easytorch import ETDataset
+from easytorch.vision import (Image, get_chunk_indexes, expand_and_mirror_patch)
 sep = os.sep
-
 
 class MyDataset(ETDataset):
     def __init__(self, **kw):
@@ -115,6 +107,15 @@ class MyDataset(ETDataset):
 ```
 ### Define iteration and how to save predicted images.
 ```python
+from easytorch import ETTrainer
+from models import UNet
+import torch
+import torch.nn.functional as F
+from easytorch.vision import  merge_patches
+import numpy as np
+import os
+from PIL import Image as IMG
+sep = os.sep
 class MyTrainer(ETTrainer):
     def __init__(self, args):
         super().__init__(args)
@@ -167,26 +168,19 @@ class MyTrainer(ETTrainer):
 ```python
 import argparse
 from easytorch.etargs import ap
-import dataspecs as dspec
 
 from easytorch import EasyTorch
 from classification import MyTrainer, MyDataset
-
-ap = argparse.ArgumentParser(parents=[ap], add_help=False)
-dataspecs = [dspec.DRIVE, dspec.STARE]
-runner = EasyTorch(dataspecs, ap)
-
+runner = EasyTorch([DRIVE, STARE],
+                   phase='train', batch_size=4, epochs=21,
+                   load_sparse=True, num_channel=1, num_class=2,
+                   model_scale=16, dataset_dir='datasets')
 if __name__ == "__main__":
     runner.run(MyDataset, MyTrainer)
     runner.run_pooled(MyDataset, MyTrainer)
 
 
 ```
-
-##### Args used in **Training+Validation+Test**
-    * $python main.py -ph train -nch 1 -e 21 -b 8 -lsp True -r 1
-##### To run **Only Test**
-    * $python main.py -ph test -nch 1 -e 21 -b 8 -lsp True -r 1
 
 ### Results for DRIVE, STARE and pooled are in net_logs folder
 * It should be trained more epochs to gets state of the art result. 
