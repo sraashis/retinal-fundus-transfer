@@ -20,10 +20,11 @@ STARE = {
 }
 
 
-runner = EasyTorch([DRIVE, STARE],
-                   phase='train', batch_size=4, epochs=21,
+runner = EasyTorch([DRIVE,STARE],
+                   phase='train', batch_size=4, epochs=31,
                    load_sparse=True, num_channel=1, num_class=2,
-                   model_scale=16, dataset_dir='datasets')
+                   model_scale=4, dataset_dir='datasets',
+                   verbose=True, gpus=[1], num_folds=3, force=True)
 
 if __name__ == "__main__":
     runner.run(MyDataset, MyTrainer)
