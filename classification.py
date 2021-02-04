@@ -116,13 +116,7 @@ class MyTrainer(ETTrainer):
         img_shape = dataset.image_objs[file].array.shape
 
         """
-        Loop over and gather all the predicted patches of one image and merge together"""
-        patches = []
-        for it in its:
-            patches.append(it["output"][:, 1, :, :])
-
-        patches = torch.cat(patches, 0).cpu().numpy() * 255
-        patches = patches.astype(np.uint8)
+        Auto gather all the predicted patches of one image and merge together by calling as follows."""
+        patches = its['output']()[:, 1, :, :].cpu().numpy() * 255
         img = merge_patches(patches, img_shape, dataset.patch_shape, dataset.patch_offset)
         IMG.fromarray(img).save(self.cache['log_dir'] + sep + dataset_name + '_' + file + '.png')
-
