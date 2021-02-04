@@ -112,7 +112,6 @@ from models import UNet
 import torch
 import torch.nn.functional as F
 from easytorch.vision import  merge_patches
-import numpy as np
 import os
 from PIL import Image as IMG
 sep = os.sep
@@ -152,13 +151,8 @@ class MyTrainer(ETTrainer):
         img_shape = dataset.image_objs[file].array.shape
 
         """
-        Loop over and gather all the predicted patches of one image and merge together"""
-        patches = []
-        for it in its:
-            patches.append(it["output"][:, 1, :, :])
-
-        patches = torch.cat(patches, 0).cpu().numpy() * 255
-        patches = patches.astype(np.uint8)
+        Auto gather all the predicted patches of one image and merge together by calling as follows."""
+        patches = its['output']()[:, 1, :, :].cpu().numpy() * 255
         img = merge_patches(patches, img_shape, dataset.patch_shape, dataset.patch_offset)
         IMG.fromarray(img).save(self.cache['log_dir'] + sep + dataset_name + '_' + file + '.png')
 
@@ -166,15 +160,12 @@ class MyTrainer(ETTrainer):
 ```
 ### Entry point
 ```python
-import argparse
-from easytorch.etargs import ap
-
 from easytorch import EasyTorch
 from classification import MyTrainer, MyDataset
 runner = EasyTorch([DRIVE, STARE],
                    phase='train', batch_size=4, epochs=21,
                    load_sparse=True, num_channel=1, num_class=2,
-                   model_scale=16, dataset_dir='datasets')
+                   model_scale=4, dataset_dir="datasets")
 if __name__ == "__main__":
     runner.run(MyDataset, MyTrainer)
     runner.run_pooled(MyDataset, MyTrainer)
