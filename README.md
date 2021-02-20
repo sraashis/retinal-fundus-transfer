@@ -167,8 +167,8 @@ runner = EasyTorch([DRIVE, STARE],
                    load_sparse=True, num_channel=1, num_class=2,
                    model_scale=4, dataset_dir="datasets")
 if __name__ == "__main__":
-    runner.run(MyDataset, MyTrainer)
-    runner.run_pooled(MyDataset, MyTrainer)
+    runner.run(MyTrainer, MyDataset)
+    runner.run_pooled(MyTrainer, MyDataset)
 
 
 ```
