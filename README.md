@@ -107,7 +107,7 @@ class MyDataset(ETDataset):
 ```
 ### Define iteration and how to save predicted images.
 ```python
-from easytorch import ETTrainer
+from easytorch import ETTrainer, Prf1a
 from models import UNet
 import torch
 import torch.nn.functional as F
@@ -155,6 +155,14 @@ class MyTrainer(ETTrainer):
         patches = its['output']()[:, 1, :, :].cpu().numpy() * 255
         img = merge_patches(patches, img_shape, dataset.patch_shape, dataset.patch_offset)
         IMG.fromarray(img).save(self.cache['log_dir'] + sep + dataset_name + '_' + file + '.png')
+        
+    def init_experiment_cache(self):
+        self.cache.update(monitor_metric='f1', metric_direction='maximize')
+        self.cache.update(log_header='Loss,Accuracy,F1,Precision,Recall')
+
+    def new_metrics(self):
+        return Prf1a()
+
 
 
 ```
