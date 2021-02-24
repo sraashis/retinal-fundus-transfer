@@ -123,7 +123,7 @@ class MyTrainer(ETTrainer):
 
     def init_experiment_cache(self):
         self.cache.update(monitor_metric='f1', metric_direction='maximize')
-        self.cache.update(log_header='Loss,Accuracy,F1,Precision,Recall')
+        self.cache.update(log_header='Loss|Accuracy,F1,Precision,Recall')
 
     def new_metrics(self):
         return Prf1a()
