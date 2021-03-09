@@ -81,8 +81,6 @@ class MyDataset(ETDataset):
 
 
 class MyTrainer(ETTrainer):
-    def __init__(self, args):
-        super().__init__(args)
 
     def _init_nn_model(self):
         self.nn['model'] = UNet(self.args['num_channel'], self.args['num_class'], reduce_by=self.args['model_scale'])
