@@ -33,9 +33,9 @@ DRIVE = {
 
 loader_args = {'train': {'batch_size': 2, 'drop_last': True}}
 runner = EasyTorch([DRIVE],
-                   phase='train', batch_size=4, epochs=2,
+                   phase='train', batch_size=4, epochs=31,
                    load_sparse=True, num_channel=1, num_class=2,
-                   model_scale=2, dataset_dir='datasets', seed=1, load_limit=15,
+                   model_scale=2, dataset_dir='datasets', seed=1,
                    verbose=True, num_folds=3, dataloader_args=loader_args)
 
 if __name__ == "__main__":
