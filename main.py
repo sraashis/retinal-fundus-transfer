@@ -18,21 +18,26 @@ DRIVE = {
     'data_dir': 'DRIVE' + sep + 'images',
     'label_dir': 'DRIVE' + sep + 'manual',
     'mask_dir': 'DRIVE' + sep + 'mask',
+    'split_dir': 'DRIVE' + sep + 'splits',
     'label_getter': get_label_drive,
     'mask_getter': get_mask_drive
 }
 
 
+def get_labels_stare(file_name):
+    return file_name.split('.')[0] + '.ah.pgm'
 
-# STARE = {
-#     'name': 'STARE',
-#     'data_dir': 'STARE' + sep + 'stare-images',
-#     'label_dir': 'STARE' + sep + 'labels-ah',
-#     'label_getter': lambda file_name: file_name.split('.')[0] + '.ah.pgm',
-# }
+
+STARE = {
+    'name': 'STARE',
+    'data_dir': 'STARE' + sep + 'stare-images',
+    'label_dir': 'STARE' + sep + 'labels-ah',
+    'split_dir': 'STARE' + sep + 'splits',
+    'label_getter': get_labels_stare,
+}
 
 loader_args = {'train': {'batch_size': 2, 'drop_last': True}}
-runner = EasyTorch([DRIVE],
+runner = EasyTorch([DRIVE, STARE],
                    phase='train', batch_size=4, epochs=31,
                    load_sparse=True, num_channel=1, num_class=2,
                    model_scale=2, dataset_dir='datasets', seed=1,
@@ -40,4 +45,4 @@ runner = EasyTorch([DRIVE],
 
 if __name__ == "__main__":
     runner.run(MyTrainer, MyDataset)
-    # runner.run_pooled(MyTrainer, MyDataset)
+    runner.run_pooled(MyTrainer, MyDataset)
