@@ -36,7 +36,7 @@ runner = EasyTorch([DRIVE],
                    phase='train', batch_size=4, epochs=31,
                    load_sparse=True, num_channel=1, num_class=2,
                    model_scale=2, dataset_dir='datasets', seed=1,
-                   verbose=True, num_folds=3, dataloader_args=loader_args)
+                   verbose=True, dataloader_args=loader_args)
 
 if __name__ == "__main__":
     runner.run(MyTrainer, MyDataset)
