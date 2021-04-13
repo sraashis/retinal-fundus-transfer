@@ -1,43 +1,73 @@
 ### This example consist of retinal blood vessel segmentation on two datasets- DRIVE<sub>[1]</sub>, and STARE<sub>[2]</sub> using  [easytorch](https://github.com/sraashis/easytorch) frameowork.
 
-- **Install pytorch and torchvision from [official website](https://pytorch.org/)**
-- **pip install easytorch**
+**Install pytorch and torchvision from [official website](https://pytorch.org/)**
+
+```
+pip install easytorch
+```
+
 1. Initialize the **dataspecs.py** as follows. Non existing directories will be automatically created in the first run.
+
 ```python
 import os
 
 sep = os.sep
+
+
+def get_label_drive(file_name):
+    return file_name.split('_')[0] + '_manual1.gif'
+
+
+def get_mask_drive(file_name):
+    return file_name.split('_')[0] + '_mask.gif'
+
+
 DRIVE = {
     'name': 'DRIVE',
     'data_dir': 'DRIVE' + sep + 'images',
     'label_dir': 'DRIVE' + sep + 'manual',
-    'label_getter': lambda file_name: file_name.split('_')[0] + '_manual1.gif',
-    'mask_getter': lambda file_name: file_name.split('_')[0] + '_mask.gif'
+    'mask_dir': 'DRIVE' + sep + 'mask',
+    'split_dir': 'DRIVE' + sep + 'splits',
+    'label_getter': get_label_drive,
+    'mask_getter': get_mask_drive
 }
+
+
+def get_labels_stare(file_name):
+    return file_name.split('.')[0] + '.ah.pgm'
+
+
 STARE = {
     'name': 'STARE',
     'data_dir': 'STARE' + sep + 'stare-images',
     'label_dir': 'STARE' + sep + 'labels-ah',
-    'label_getter': lambda file_name: file_name.split('.')[0] + '.ah.pgm',
+    'split_dir': 'STARE' + sep + 'splits',
+    'label_getter': get_labels_stare,
 }
 
+
 ```
+
 * **name** Unique name for each specification used.
 * **data_dir** is the path to images/or any data points.
 * **label_dir** is the path to ground truth.
+* **split_dir** path to k-fold splits (k>=1). It is exclusive to num_folds, split_ratio and dominates them if given.
 * **label_getter** is a function that gets corresponding ground truth of an image/data-point from **label_dir**.
 * **mask_getter** is a function that gets corresponding mask of an image/data-point from **mask_dir**.
 
 ### Define how to load each image files to feed to the U-Net.
+
 ```python
 import os
 import random
 
 import numpy as np
 import torchvision.transforms as tmf
-from easytorch import ETDataset
+from easytorch import ETDataset, EasyTorch
 from easytorch.vision import (Image, get_chunk_indexes, expand_and_mirror_patch)
+
 sep = os.sep
+
 
 class MyDataset(ETDataset):
     def __init__(self, **kw):
@@ -105,16 +135,21 @@ class MyDataset(ETDataset):
             [tmf.ToPILImage(), tmf.ToTensor()])
 
 ```
+
 ### Define iteration and how to save predicted images.
+
 ```python
 from easytorch import ETTrainer, Prf1a
 from models import UNet
 import torch
 import torch.nn.functional as F
-from easytorch.vision import  merge_patches
+from easytorch.vision import merge_patches
 import os
 from PIL import Image as IMG
+
 sep = os.sep
+
+
 class MyTrainer(ETTrainer):
 
     def _init_nn_model(self):
@@ -153,7 +188,7 @@ class MyTrainer(ETTrainer):
         patches = its['output']()[:, 1, :, :].cpu().numpy() * 255
         img = merge_patches(patches, img_shape, dataset.patch_shape, dataset.patch_offset)
         IMG.fromarray(img).save(self.cache['log_dir'] + sep + dataset_name + '_' + file + '.png')
-        
+
     def init_experiment_cache(self):
         self.cache.update(monitor_metric='f1', metric_direction='maximize')
         self.cache.update(log_header='Loss,Accuracy,F1,Precision,Recall')
@@ -164,38 +199,46 @@ class MyTrainer(ETTrainer):
 
 
 ```
+
 ### Entry point
+
 ```python
-from easytorch import EasyTorch
-from classification import MyTrainer, MyDataset
+
 runner = EasyTorch([DRIVE, STARE],
-                   phase='train', batch_size=4, epochs=21,
+                   phase='train', batch_size=4, epochs=31,
                    load_sparse=True, num_channel=1, num_class=2,
-                   model_scale=4, dataset_dir="datasets")
+                   model_scale=2, dataset_dir='datasets', seed=1,
+                   verbose=True)
+
 if __name__ == "__main__":
     runner.run(MyTrainer, MyDataset)
     runner.run_pooled(MyTrainer, MyDataset)
 
-
 ```
 
 ### Results for DRIVE, STARE and pooled are in net_logs folder
-* It should be trained more epochs to gets state of the art result. 
+
+* It should be trained more epochs to gets state of the art result.
 
 ### Dataset pooling
-It is an useful feature that can combine datasets without moving the datasets from their original locations, and feed to the network as if we are training on one large dataset. In this example, we have ran the following experiments:
+
+It is an useful feature that can combine datasets without moving the datasets from their original locations, and feed to
+the network as if we are training on one large dataset. In this example, we have ran the following experiments:
+
 * Train one model on DRIVE dataset with single train, validation, and test split.
 * Train 5-models on STARE datasets with 5-fold split(5 fold cross-validation).
 * Train one model by pooling both DRIVE and STARE Datasets without moving data from the original location.
 
 ### Generated plots:
+
 1. DRIVE dataset logs example.
     * Training log
-        ![DRIVE training log](net_logs/DRIVE/SPLIT_1_training_log.png)
+      ![DRIVE training log](net_logs/DRIVE/SPLIT_1_training_log.png)
     * Validation log
-        ![DRIVE training log](net_logs/DRIVE/SPLIT_1_validation_log.png)
-      
+      ![DRIVE training log](net_logs/DRIVE/SPLIT_1_validation_log.png)
+
 ### Test Scores
+
 |Fold|Precision|Recall|F1|Accuracy|
 |------------|-------|-------|-------|-------|
 |SPLIT_2.json|0.8481 |0.80524|0.82611|0.96693|
@@ -215,11 +258,13 @@ Please note that one MUST cite the original authors if these dataset are used in
 ``**
 
 ## References
-1. DRIVE Dataset, J. Staal, M. Abramoff, M. Niemeijer, M. Viergever, and B. van Ginneken, “Ridge based vessel segmentation in color images of the retina,” IEEE Transactions on Medical Imaging 23, 501–509 (2004)
-2. STARE Dataset, A. D. Hoover, V. Kouznetsova, and M. Goldbaum, “Locating blood vessels in retinal images by piecewise threshold
-       probing of a matched filter response,” IEEE Transactions on Med. Imaging 19, 203–210 (2000)
-3. Architecture used, O. Ronneberger, P. Fischer, and T. Brox, “U-net: Convolutional networks for biomedical image segmentation,” in
-    MICCAI, (2015)
+
+1. DRIVE Dataset, J. Staal, M. Abramoff, M. Niemeijer, M. Viergever, and B. van Ginneken, “Ridge based vessel
+   segmentation in color images of the retina,” IEEE Transactions on Medical Imaging 23, 501–509 (2004)
+2. STARE Dataset, A. D. Hoover, V. Kouznetsova, and M. Goldbaum, “Locating blood vessels in retinal images by piecewise
+   threshold probing of a matched filter response,” IEEE Transactions on Med. Imaging 19, 203–210 (2000)
+3. Architecture used, O. Ronneberger, P. Fischer, and T. Brox, “U-net: Convolutional networks for biomedical image
+   segmentation,” in MICCAI, (2015)
 4. Our paper on vessel segmentation:
     * [Link to arxiv](https://arxiv.org/abs/1903.07803)
     * [Dynamic Deep Networks for Retinal Vessel Segmentation](https://www.frontiersin.org/articles/10.3389/fcomp.2020.00035/abstract)
