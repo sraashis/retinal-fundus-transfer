@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 import torchvision.transforms as tmf
 from PIL import Image as IMG
-from easytorch import ETTrainer, ETDataset, Prf1a
+from easytorch import ETTrainer, ETDataset, Prf1a, ETMeter
 from easytorch.vision import (Image, get_chunk_indexes, expand_and_mirror_patch, merge_patches)
 
 from models import UNet
@@ -98,13 +98,11 @@ class MyTrainer(ETTrainer):
         out = F.softmax(out, 1)
 
         _, pred = torch.max(out, 1)
-        sc = self.new_metrics()
-        sc.add(pred, labels)
+        meter = self.new_meter()
+        meter.averages.add(loss.item(), len(inputs))
+        meter.metrics.add(pred, labels.float())
 
-        avg = self.new_averages()
-        avg.add(loss.item(), len(inputs))
-
-        return {'loss': loss, 'averages': avg, 'output': out, 'metrics': sc, 'predictions': pred}
+        return {'loss': loss, 'meter': meter, 'output':out}
 
     def save_predictions(self, dataset, its):
         """load_sparse option in default params loads patches of single image in one dataloader.
@@ -123,5 +121,7 @@ class MyTrainer(ETTrainer):
         self.cache.update(monitor_metric='f1', metric_direction='maximize')
         self.cache.update(log_header='Loss|Accuracy,F1,Precision,Recall')
 
-    def new_metrics(self):
-        return Prf1a()
+    def new_meter(self):
+        return ETMeter(
+            metrics=Prf1a()
+        )
