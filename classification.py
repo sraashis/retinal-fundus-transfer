@@ -100,7 +100,7 @@ class MyTrainer(ETTrainer):
         _, pred = torch.max(out, 1)
         meter = self.new_meter()
         meter.averages.add(loss.item(), len(inputs))
-        meter.metrics.add(pred, labels.float())
+        meter.metrics['prf1a'].add(pred, labels.float())
 
         return {'loss': loss, 'meter': meter, 'output':out}
 
@@ -123,5 +123,5 @@ class MyTrainer(ETTrainer):
 
     def new_meter(self):
         return ETMeter(
-            metrics=Prf1a()
+            prf1a=Prf1a()
         )
