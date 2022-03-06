@@ -82,20 +82,12 @@ DRIVE = {
 }
 
 @misc{2202.02382,
-  Author = {Aashis Khanal and Saeid Motevali and Rolando Estrada},
-  Title = {Fully Automated Tree Topology Estimation and Artery-Vein Classification},
-  Year = {2022},
-  Eprint = {arXiv:2202.02382},
+        Author = {Aashis Khanal and Saeid Motevali and Rolando Estrada},
+        Title = {Fully Automated Tree Topology Estimation and Artery-Vein Classification},
+        Year = {2022},
+        Eprint = {arXiv:2202.02382},
 }
 
-@misc{easytorch,
-  author = {Khanal, Aashis},
-  title = {Easy Torch}
-  year = {2020},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  url = {https://github.com/sraashis/easytorch}
-}
 ```
 #### Please cite the respective datasets below if you use then in any way.
 ### References for publicly available datasets and Model used.
