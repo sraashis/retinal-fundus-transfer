@@ -37,15 +37,11 @@ if __name__ == "__main__":
     ap.add_argument('-ncl', '--num-class', default=2, type=int, help='Number of class[Default: 2]')
     ap.add_argument('-rcw', '--random-class-weights', default=False, type=boolean_string,
                     help='Random class weights [Default: False]')
-    ap.add_argument('-nor', '--normalize', default=False, type=boolean_string,
-                    help='Normalize[Default: False]')
 
     args = vars(ap.parse_args())
 
     if args['random_class_weights']:
         args['log_dir'] = args['log_dir'] + 'RdClsWts'
-    if args['normalize']:
-        args['log_dir'] = args['log_dir'] + 'Norm'
     args['log_dir'] = f"{args['log_dir']}Bsz{args['batch_size']}R{args['model_scale']}"
 
     if len(args['target_datasets']) == 0:
