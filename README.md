@@ -88,7 +88,7 @@ DRIVE = {
         Eprint = {arXiv:2202.02382},
 }
 ```
-#### Please cite the respective datasets below if you use then in any way.
+#### Please cite the respective datasets below if you use them in any way.
 ### References for publicly available datasets and Model used.
 
 1. DRIVE Dataset, J. Staal, M. Abramoff, M. Niemeijer, M. Viergever, and B. van Ginneken, “Ridge based vessel
