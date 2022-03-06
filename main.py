@@ -1,48 +1,81 @@
-from easytorch import EasyTorch
-from classification import MyTrainer, MyDataset
 import os
+import sys
 
-sep = os.sep
+sys.path.append("..")
 
+import argparse
 
-def get_label_drive(file_name):
-    return file_name.split('_')[0] + '_manual1.gif'
+from easytorch import EasyTorch
+from easytorch import default_ap
+from easytorch.config import boolean_string
 
-
-def get_mask_drive(file_name):
-    return file_name.split('_')[0] + '_mask.gif'
-
-
-DRIVE = {
-    'name': 'DRIVE',
-    'data_dir': 'DRIVE' + sep + 'images',
-    'label_dir': 'DRIVE' + sep + 'manual',
-    'mask_dir': 'DRIVE' + sep + 'mask',
-    'split_dir': 'DRIVE' + sep + 'splits',
-    'label_getter': get_label_drive,
-    'mask_getter': get_mask_drive
-}
+from classification import VesselSegTrainer, BinarySemSegImgPatchDatasetCustomTransform
+from dataspecs import original, transfer, target
 
 
-def get_labels_stare(file_name):
-    return file_name.split('.')[0] + '.ah.pgm'
+def main(args, dataspecs, **kw):
+    runner = EasyTorch(dataspecs, args, load_sparse=True, **kw)
+    runner.run(VesselSegTrainer, BinarySemSegImgPatchDatasetCustomTransform)
 
 
-STARE = {
-    'name': 'STARE',
-    'data_dir': 'STARE' + sep + 'stare-images',
-    'label_dir': 'STARE' + sep + 'labels-ah',
-    'split_dir': 'STARE' + sep + 'splits',
-    'label_getter': get_labels_stare,
-}
+def pooled_main(args, dataspecs, **kw):
+    runner = EasyTorch(dataspecs, args, load_sparse=True, **kw)
+    runner.run_pooled(VesselSegTrainer, BinarySemSegImgPatchDatasetCustomTransform)
 
-loader_args = {'train': {'batch_size': 2, 'drop_last': True}}
-runner = EasyTorch([DRIVE, STARE],
-                   phase='train', batch_size=4, epochs=31,
-                   load_sparse=True, num_channel=1, num_class=2,
-                   model_scale=2, dataset_dir='datasets', seed=1,
-                   verbose=True, dataloader_args=loader_args)
+
+def has_dspec(dname, given_dnames):
+    clean_dname = ''.join(i for i in dname if not i.isdigit())
+    return clean_dname in given_dnames
+
 
 if __name__ == "__main__":
-    runner.run(MyTrainer, MyDataset)
-    runner.run_pooled(MyTrainer, MyDataset)
+    ap = argparse.ArgumentParser(parents=[default_ap], add_help=False)
+    ap.add_argument('--training-datasets', default=[], nargs='*', help='Which Datasets to use')
+    ap.add_argument('-r', '--model-scale', default=1, type=int, help='Model scale factor.[Default: 1]')
+    ap.add_argument('--target-datasets', default=[], nargs='*', help='Target domains.')
+    ap.add_argument('-nch', '--num-channel', default=1, type=int, help='Number of input channel[Default: 1]')
+    ap.add_argument('-ncl', '--num-class', default=2, type=int, help='Number of class[Default: 2]')
+    ap.add_argument('-rcw', '--random-class-weights', default=False, type=boolean_string,
+                    help='Random class weights [Default: False]')
+    ap.add_argument('-nor', '--normalize', default=False, type=boolean_string,
+                    help='Normalize[Default: False]')
+
+    args = vars(ap.parse_args())
+
+    if args['random_class_weights']:
+        args['log_dir'] = args['log_dir'] + 'RdClsWts'
+    if args['normalize']:
+        args['log_dir'] = args['log_dir'] + 'Norm'
+    args['log_dir'] = f"{args['log_dir']}Bsz{args['batch_size']}R{args['model_scale']}"
+
+    if len(args['target_datasets']) == 0:
+        """If no target, datasets train individually(Original dataspecs)"""
+        dataset_list = [original.DRIVE, original.STARE, original.AV_WIDE, original.CHASEDB, original.HRF,
+                        original.IOSTAR]
+        if len(args['training_datasets']) > 0:
+            dataset_list = [d for d in dataset_list if has_dspec(d['name'], args['training_datasets'])]
+        main(args, dataset_list, log_dir=args['log_dir'])
+
+    else:
+        """
+        If target datasets are specified, use all the available dataset(with ground truth) to train a single model 
+        and use the best to generate vessels mask for given target datasets.
+        """
+        dataset_list = transfer.get(resize=(768, 768)) + transfer.get(resize=(896, 896)) + transfer.get(
+            resize=(1024, 1024))
+
+        if len(args['training_datasets']) > 0:
+            dataset_list = [d for d in dataset_list if has_dspec(d['name'], args['training_datasets'])]
+
+        pooled_main(args, dataset_list, log_dir=args['log_dir'])
+
+        """Run on target dataset with best model."""
+        pt = f"{args['log_dir']}{os.sep}Pooled_{len(dataset_list)}{os.sep}best_pooled_chk.tar"
+        target_list = [target.DDR_TRAIN, target.DDR_VALID, target.DDR_TEST]
+        if len(args['target_datasets']) > 0:
+            target_list = [d for d in target_list if has_dspec(d['name'], args['target_datasets'])]
+
+        for t in target_list:
+            t['name'] = t['name'] + f"_{len(dataset_list)}"
+        main(args, target_list, phase='test', split_ratio=[0, 0, 1], pretrained_path=pt,
+             log_dir=args['log_dir'], force=True)
