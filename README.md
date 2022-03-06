@@ -1,8 +1,8 @@
-### This example consist of an easy way of doing transfer learning for color fundus imags processing tasks.
+### An easy way of doing transfer learning for color fundus imags processing tasks.
 * Like vessel segmentation, Aretery/Vein classification, and optic disk segementation, exudates, segmentation/detection, and many more.
-* It includes specification for all publicly available datasets for retinal vesel segmentation.
 * One can simply download the data and start working on transfer learning tasks.
 * It uses custom Image transforms that works well with retinal images.
+* Below is a detailed explanation on transfer learning for retinal vessel segmentation with publicly available dataset to any datasets that does not have ground truth vessel mask available.
 
 ### Step 1:
 **Install pytorch and torchvision from [official website](https://pytorch.org/), and run:**
