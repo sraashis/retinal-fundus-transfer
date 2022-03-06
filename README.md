@@ -87,7 +87,6 @@ DRIVE = {
         Year = {2022},
         Eprint = {arXiv:2202.02382},
 }
-
 ```
 #### Please cite the respective datasets below if you use then in any way.
 ### References for publicly available datasets and Model used.
