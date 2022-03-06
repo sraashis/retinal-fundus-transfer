@@ -43,7 +43,9 @@ pip install easytorch
   * We train by using data augmentation; Simply train a model with different sizes of public dataset. It can get complicated because we need to resize the ground truths as well. But worry not, this code handles all of that.
 
 ### Step 2(How to do exactly?):
-#### Case 1: Do transfer learning for DDR dataset discussed as above.
+#### Case 1: Run a working example on DDR dataset using two datasets(DRIVE and WIDE) for transfer learning.
+`python main.py -ph train -data datasets --training-datasets DRIVE STARE --target-datasets DDR_train -spl 0.75 0.25 0 -b 8 -nw 6 -lr 0.001 -e 501 -pat 101 -rcw True`
+#### Case 2: Use more datasets as below.
 `python main.py -ph train -data <path to your dataset> --training-datasets DRIVE CHASEDB HRF IOSTAR STARE --target-datasets DDR_train -spl 0.75 0.25 0 -b 8 -nw 6 -lr 0.001 -e 501 -pat 101 -rcw True`
 * This code uses `easytorch` framework and inherits some default args. Consult [easytorch repo](https://github.com/sraashis/easytorch) for details. But worry not, I will explain each of these.
   * **-ph** train: specifies which phase like train, test(for inference).
