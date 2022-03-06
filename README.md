@@ -88,8 +88,7 @@ DRIVE = {
         Eprint = {arXiv:2202.02382},
 }
 ```
-#### Please cite the respective datasets below if you use them in any way.
-### References for publicly available datasets and Model used.
+#### Please cite the respective datasets below if you use them in any way..
 
 1. DRIVE Dataset, J. Staal, M. Abramoff, M. Niemeijer, M. Viergever, and B. van Ginneken, “Ridge based vessel
    segmentation in color images of the retina,” IEEE Transactions on Medical Imaging 23, 501–509 (2004)
