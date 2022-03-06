@@ -1,8 +1,7 @@
 ### An easy way of doing transfer learning for color fundus images processing tasks.
 * Like vessel segmentation, Aretery/Vein classification, and optic disk segementation, exudates, segmentation/detection, and many more.
-* One can simply download the data and start working on transfer learning tasks.
-* It uses custom Image transforms that works well with retinal images.
-* Below is a detailed explanation on transfer learning for retinal vessel segmentation with publicly available dataset to any datasets that does not have ground truth vessel mask available.
+* It uses special custom Image transforms that works well with retinal images.
+* A detailed explanation on transfer learning for retinal vessel segmentation with publicly available dataset to any datasets that does not have ground truth vessel mask available as follows:
 
 ### Step 1:
 **Install pytorch and torchvision from [official website](https://pytorch.org/), and run:**
@@ -15,26 +14,26 @@ pip install easytorch
 * It comes with specifications to do transfer learning in directory [dataspecs/transfer.py](datasets/transfer.py).
 * Example specification for DRIVE dataset:
 
-```
-      def get_label_drive(file_name):
-              return file_name.split('_')[0] + '_manual1.gif'
-      
-      def get_mask_drive(file_name):
-          return file_name.split('_')[0] + '_mask.gif'
-      
-      DRIVE = {
-          'name': f'DRIVE',
-          'patch_shape': (388, 388),
-          'patch_offset': (300, 300),
-          'expand_by': (184, 184),
-          'data_dir': 'DRIVE' + sep + 'images',
-          'label_dir': 'DRIVE' + sep + 'manual',
-          'mask_dir': 'DRIVE' + sep + 'mask',
-          'label_getter': get_label_drive,
-          'mask_getter': get_mask_drive,
-          'resize': (896, 896),
-          'thr_manual': 50
-      }
+```python
+def get_label_drive(file_name):
+        return file_name.split('_')[0] + '_manual1.gif'
+
+def get_mask_drive(file_name):
+    return file_name.split('_')[0] + '_mask.gif'
+
+DRIVE = {
+    'name': f'DRIVE',
+    'patch_shape': (388, 388),
+    'patch_offset': (300, 300),
+    'expand_by': (184, 184),
+    'data_dir': 'DRIVE' + sep + 'images',
+    'label_dir': 'DRIVE' + sep + 'manual',
+    'mask_dir': 'DRIVE' + sep + 'mask',
+    'label_getter': get_label_drive,
+    'mask_getter': get_mask_drive,
+    'resize': (896, 896),
+    'thr_manual': 50
+}
 ```
 * We use U-Net model which works on patches of images with sliding window.
 * After resizing, we need to binarize the ground truth using `thr_manual` threshold.
@@ -44,11 +43,15 @@ pip install easytorch
   * We can train public dataset in a smaller size(this makes sense if target dataset is too large and hard to process), and also resize the DDR dataset to same size.
   * We train by using data augmentation; Simply train a model with different sizes of public dataset. It can get complicated because we need to resize the ground truths as well. But worry not, this code handles all of that.
 
-### Step 2(How to do exactly?):
-#### Case 1: Run a working example on DDR dataset using two datasets(DRIVE and WIDE) for transfer learning.
+### Finally:
+**Case 1:** Run a working example on DDR dataset using two datasets(DRIVE and WIDE) for transfer learning.
+
 `python main.py -ph train -data datasets --training-datasets DRIVE STARE --target-datasets DDR_train -spl 0.75 0.25 0 -b 8 -nw 6 -lr 0.001 -e 501 -pat 101 -rcw True`
-#### Case 2: Use more datasets as below.
+
+**Case 2:** Use more datasets as below.
+
 `python main.py -ph train -data <path to your dataset> --training-datasets DRIVE CHASEDB HRF IOSTAR STARE --target-datasets DDR_train -spl 0.75 0.25 0 -b 8 -nw 6 -lr 0.001 -e 501 -pat 101 -rcw True`
+
 * This code uses `easytorch` framework and inherits some default args. Consult [easytorch repo](https://github.com/sraashis/easytorch) for details. But worry not, I will explain each of these.
   * **-ph** train: specifies which phase like train, test(for inference).
   * **-data** datasets: Path to your datasets so that you can run this code anywhere your data is. Just need to point to your datasets(Check [datasets](datasets)) folder for an example.
