@@ -70,7 +70,7 @@ DRIVE = {
 #### Please star or cite if you find it useful.
 
 ```
-@article{deepyn_10.3389/fcomp.2020.00035,
+@article{deepdyn_10.3389/fcomp.2020.00035,
 	title        = {Dynamic Deep Networks for Retinal Vessel Segmentation},
 	author       = {Khanal, Aashis and Estrada, Rolando},
 	year         = 2020,
