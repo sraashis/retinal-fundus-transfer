@@ -104,6 +104,6 @@ pip install easytorch
 3. CHASE DB: Fraz, M. M., Remagnino, P., Hoppe, A., Uyyanonvara, B., Rudnicka, A. R., Owen, C. G., & Barman, S. A. (2012). An ensemble classification-based approach applied to retinal blood vessel segmentation. IEEE transactions on bio-medical engineering, 59(9), 2538–2548. https://doi.org/10.1109/TBME.2012.2205687
 4. HRF Dataset: Budai, A., Bock, R., Maier, A., Hornegger, J., & Michelson, G. (2013). Robust vessel segmentation in fundus images. International journal of biomedical imaging, 2013, 154860. https://doi.org/10.1155/2013/154860
 5. IOSTAR Dataset: J. Zhang, B. Dashtbozorg, E. Bekkers, J. P. W. Pluim, R. Duits and B. M. ter Haar Romeny, "Robust Retinal Vessel Segmentation via Locally Adaptive Derivative Frames in Orientation Scores," in IEEE Transactions on Medical Imaging, vol. 35, no. 12, pp. 2631-2644, Dec. 2016, doi: 10.1109/TMI.2016.2587062.
-6. 7. AV-WIDE Dataset: Estrada, R., Tomasi, C., Schmidler, S. C., & Farsiu, S. (2015). Tree Topology Estimation. IEEE transactions on pattern analysis and machine intelligence, 37(8), 1688–1701. https://doi.org/10.1109/TPAMI.2014.2382116
+6. AV-WIDE Dataset: Estrada, R., Tomasi, C., Schmidler, S. C., & Farsiu, S. (2015). Tree Topology Estimation. IEEE transactions on pattern analysis and machine intelligence, 37(8), 1688–1701. https://doi.org/10.1109/TPAMI.2014.2382116
 7. Architecture used, O. Ronneberger, P. Fischer, and T. Brox, “U-net: Convolutional networks for biomedical image
    segmentation,” in MICCAI, (2015)
