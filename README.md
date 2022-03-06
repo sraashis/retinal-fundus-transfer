@@ -1,4 +1,4 @@
-### An easy way of doing transfer learning for color fundus imags processing tasks.
+### An easy way of doing transfer learning for color fundus images processing tasks.
 * Like vessel segmentation, Aretery/Vein classification, and optic disk segementation, exudates, segmentation/detection, and many more.
 * One can simply download the data and start working on transfer learning tasks.
 * It uses custom Image transforms that works well with retinal images.
