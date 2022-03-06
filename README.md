@@ -36,8 +36,9 @@ pip install easytorch
           'thr_manual': 50
       }
 ```
-
-* It also includes a target dataset DDR for which we don't have vessel segmentation available. [DDR specification](dataspecs/target.py). We want to do transfer learning from existing public datasets.
+* We use U-Net model which works on patches of images with sliding window
+* After resizing we need to binarize the ground truth using `thr_manual` threshold.
+* This repo also includes a target dataset DDR for which we don't have vessel segmentation available. [DDR specification](dataspecs/target.py). We want to do transfer learning from existing public datasets.
 * Different ways we can do transfer learning for vessel segmentation:
   * We can either train by resizing all public datasets to approx same size as DDR. Thats what the `resize` is for in the above spec.  
   * We can train public dataset in a smaller size(this makes sense if target dataset is too large and hard to process), and also resize the DDR dataset to same size.
