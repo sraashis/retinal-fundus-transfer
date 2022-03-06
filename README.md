@@ -15,26 +15,27 @@ pip install easytorch
 * It comes with specifications to do transfer learning in directory [dataspecs/transfer.py](datasets/transfer.py).
 * Example specification for DRIVE dataset:
 
-
-    def get_label_drive(file_name):
-        return file_name.split('_')[0] + '_manual1.gif'
-
-    def get_mask_drive(file_name):
-        return file_name.split('_')[0] + '_mask.gif'
-    
-    DRIVE = {
-        'name': f'DRIVE',
-        'patch_shape': (388, 388),
-        'patch_offset': (300, 300),
-        'expand_by': (184, 184),
-        'data_dir': 'DRIVE' + sep + 'images',
-        'label_dir': 'DRIVE' + sep + 'manual',
-        'mask_dir': 'DRIVE' + sep + 'mask',
-        'label_getter': get_label_drive,
-        'mask_getter': get_mask_drive,
-        'resize': (896, 896),
-        'thr_manual': 50
-    }
+```
+      def get_label_drive(file_name):
+              return file_name.split('_')[0] + '_manual1.gif'
+      
+      def get_mask_drive(file_name):
+          return file_name.split('_')[0] + '_mask.gif'
+      
+      DRIVE = {
+          'name': f'DRIVE',
+          'patch_shape': (388, 388),
+          'patch_offset': (300, 300),
+          'expand_by': (184, 184),
+          'data_dir': 'DRIVE' + sep + 'images',
+          'label_dir': 'DRIVE' + sep + 'manual',
+          'mask_dir': 'DRIVE' + sep + 'mask',
+          'label_getter': get_label_drive,
+          'mask_getter': get_mask_drive,
+          'resize': (896, 896),
+          'thr_manual': 50
+      }
+```
 
 * It also includes a target dataset DDR for which we don't have vessel segmentation available. [DDR specification](dataspecs/target.py). We want to do transfer learning from existing public datasets.
 * Different ways we can do transfer learning for vessel segmentation:
