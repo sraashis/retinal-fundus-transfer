@@ -44,7 +44,7 @@ pip install easytorch
 
 ### Step 2(How to do exactly?):
 #### Case 1: Do transfer learning for DDR dataset discussed as above.
-`python main.py -ph train -data <path to your dataset> --training-datasets DRIVE CHASEDB HRF IOSTAR STARE --target-datasets DDR_train -spl 0.75 0.25 0 -r 1 -b 8 -nw 6 -lr 0.001 -e 501 -pat 101 -rcw True`
+`python main.py -ph train -data <path to your dataset> --training-datasets DRIVE CHASEDB HRF IOSTAR STARE --target-datasets DDR_train -spl 0.75 0.25 0 -b 8 -nw 6 -lr 0.001 -e 501 -pat 101 -rcw True`
 * This code uses `easytorch` framework and inherits some default args. Consult [easytorch repo](https://github.com/sraashis/easytorch) for details. But worry not, I will explain each of these.
   * **-ph** train: specifies which phase like train, test(for inference).
   * **-data** datasets: Path to your datasets so that you can run this code anywhere your data is. Just need to point to your datasets(Check [datasets](datasets)) folder for an example.

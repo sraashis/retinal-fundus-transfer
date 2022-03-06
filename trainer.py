@@ -17,6 +17,50 @@ from models import UNet
 sep = os.sep
 
 
+class BinarySemSegImgPatchDatasetCustomTransform(BinarySemSegImgPatchDataset):
+
+    def get_transforms(self):
+        if self.mode == "test":
+            return tmf.Compose([tmf.ToPILImage(), tmf.ToTensor()])
+
+        _tf = [
+            tmf.ToPILImage(),
+            tmf.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3),
+            tmf.RandomAutocontrast(),
+            RandomGaussJitter(0.3, 0.5),
+            tmf.ToTensor()
+        ]
+        return tmf.Compose(_tf)
+
+    def __getitem__(self, index):
+        dname, file, row_from, row_to, col_from, col_to, cache_key = self.indices[index]
+
+        obj = self.diskcache.get(cache_key)
+        img = obj.array[:, :, 1]  # Only Green Channel
+        gt = obj.ground_truth[row_from:row_to, col_from:col_to]
+
+        p, q, r, s, pad = imgutils.expand_and_mirror_patch(
+            img.shape,
+            [row_from, row_to, col_from, col_to],
+            self.dataspecs[dname]['expand_by']
+        )
+        if len(img.shape) == 3:
+            pad = [*pad, (0, 0)]
+
+        img = np.pad(img[p:q, r:s], pad, 'reflect')
+        if self.mode == 'train' and random.uniform(0, 1) <= 0.5:
+            img = np.flip(img, 0)
+            gt = np.flip(gt, 0)
+
+        if self.mode == 'train' and random.uniform(0, 1) <= 0.5:
+            img = np.flip(img, 1)
+            gt = np.flip(gt, 1)
+
+        img = self.transforms(img)
+        gt = self.pil_to_tensor(gt)
+        return {'indices': self.indices[index], 'input': img, 'label': gt.squeeze()}
+
+
 class VesselSegTrainer(ETTrainer):
 
     def _init_nn_model(self):
@@ -105,47 +149,3 @@ class VesselSegTrainer(ETTrainer):
 
     # def _on_epoch_end(self, epoch, training_meter=None, validation_meter=None):
     #     self.lr_scheduler.step(validation_meter.extract(self.cache['monitor_metric']))
-
-
-class BinarySemSegImgPatchDatasetCustomTransform(BinarySemSegImgPatchDataset):
-
-    def get_transforms(self):
-        if self.mode == "test":
-            return tmf.Compose([tmf.ToPILImage(), tmf.ToTensor()])
-
-        _tf = [
-            tmf.ToPILImage(),
-            tmf.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3),
-            tmf.RandomAutocontrast(),
-            RandomGaussJitter(0.3, 0.5),
-            tmf.ToTensor()
-        ]
-        return tmf.Compose(_tf)
-
-    def __getitem__(self, index):
-        dname, file, row_from, row_to, col_from, col_to, cache_key = self.indices[index]
-
-        obj = self.diskcache.get(cache_key)
-        img = obj.array[:, :, 1]  # Only Green Channel
-        gt = obj.ground_truth[row_from:row_to, col_from:col_to]
-
-        p, q, r, s, pad = imgutils.expand_and_mirror_patch(
-            img.shape,
-            [row_from, row_to, col_from, col_to],
-            self.dataspecs[dname]['expand_by']
-        )
-        if len(img.shape) == 3:
-            pad = [*pad, (0, 0)]
-
-        img = np.pad(img[p:q, r:s], pad, 'reflect')
-        if self.mode == 'train' and random.uniform(0, 1) <= 0.5:
-            img = np.flip(img, 0)
-            gt = np.flip(gt, 0)
-
-        if self.mode == 'train' and random.uniform(0, 1) <= 0.5:
-            img = np.flip(img, 1)
-            gt = np.flip(gt, 1)
-
-        img = self.transforms(img)
-        gt = self.pil_to_tensor(gt)
-        return {'indices': self.indices[index], 'input': img, 'label': gt.squeeze()}

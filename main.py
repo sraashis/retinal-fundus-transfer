@@ -9,7 +9,7 @@ from easytorch import EasyTorch
 from easytorch import default_ap
 from easytorch.config import boolean_string
 
-from classification import VesselSegTrainer, BinarySemSegImgPatchDatasetCustomTransform
+from trainer import VesselSegTrainer, BinarySemSegImgPatchDatasetCustomTransform
 from dataspecs import original, transfer, target
 
 
