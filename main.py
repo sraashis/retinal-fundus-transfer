@@ -57,9 +57,8 @@ if __name__ == "__main__":
         If target datasets are specified, use all the available dataset(with ground truth) to train a single model 
         and use the best to generate vessels mask for given target datasets.
         """
-        dataset_list = transfer.get(resize=(768, 768)) + transfer.get(resize=(896, 896)) + transfer.get(
-            resize=(1024, 1024))
-
+        dataset_list = transfer.get(resize=(800, 800)) + transfer.get(resize=(896, 896))
+            
         if len(args['training_datasets']) > 0:
             dataset_list = [d for d in dataset_list if has_dspec(d['name'], args['training_datasets'])]
 
