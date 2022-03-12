@@ -57,7 +57,7 @@ DRIVE = {
   * **-data** datasets: Path to your datasets so that you can run this code anywhere your data is. Just need to point to your datasets(Check [datasets](datasets)) folder for an example.
   * **--training-dataset** ... : Which datasets to use for transfer learning from the specifications in [dataspecs](dataspecs) directory. A single model will be trained using these datasets.
   * **--target-datasets** ... : After getting the best model, which dataset to use it on to generate vessel segmentation results.
-  * **-spl** 0.75 0.25 0  ... : Split ratio for training dataset in order train, validation, test. We dont need test data for this transfer learning. We need validation set to pick the best model.
+  * **-spl** 0.75 0.25 0 : Split ratio for training dataset in order train, validation, test. We dont need test data for this transfer learning. We need validation set to pick the best model.
   * **-nw** 6 : num of workers
   * **-lr** 0.001 : Learning rate
   * **-e** 501: Epochs
