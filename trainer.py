@@ -9,7 +9,7 @@ import torchvision.transforms as tmf
 from PIL import Image as IMG
 from easytorch import ETTrainer, Prf1a, ETMeter
 from easytorch.vision import (merge_patches)
-from easytorch.vision.imgdataset2d import BinarySemSegImgPatchDataset
+from easytorch.vision.imgdataset2d import BinaryPatchDataset
 from easytorch.vision.transforms import RandomGaussJitter
 
 from models import UNet
@@ -17,7 +17,7 @@ from models import UNet
 sep = os.sep
 
 
-class BinarySemSegImgPatchDatasetCustomTransform(BinarySemSegImgPatchDataset):
+class BinarySemSegImgPatchDatasetCustomTransform(BinaryPatchDataset):
 
     def get_transforms(self):
         if self.mode == "test":
