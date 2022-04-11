@@ -11,7 +11,7 @@ pip install easytorch
 ```
 
 ### Step 2:
-* It comes with specifications to do transfer learning in directory [dataspecs/transfer.py](./datasets/transfer.py).
+* It comes with specifications to do transfer learning in directory [dataspecs/transfer.py](./dataspecs/transfer.py).
 * Example specification for DRIVE dataset:
 
 ```python
