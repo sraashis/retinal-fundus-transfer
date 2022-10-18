@@ -66,18 +66,6 @@ class VesselSegTrainer(ETTrainer):
     def _init_nn_model(self):
         self.nn['model'] = UNet(self.args['num_channel'], self.args['num_class'], reduce_by=self.args['model_scale'])
 
-    def _init_optimizer(self):
-        first_model = list(self.nn.keys())[0]
-        self.optimizer['adam'] = torch.optim.Adam(self.nn[first_model].parameters(),
-                                                  lr=self.args['learning_rate'])
-        # self.lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        #     self.optimizer['adam'],
-        #     patience=35,
-        #     min_lr=0.0001,
-        #     cooldown=15,
-        #     verbose=self.args.get('verbose')
-        # )
-
     def iteration(self, batch, **kw):
         r"""
         :param batch:
@@ -146,6 +134,3 @@ class VesselSegTrainer(ETTrainer):
         return ETMeter(
             prf1a=Prf1a()
         )
-
-    # def _on_epoch_end(self, epoch, training_meter=None, validation_meter=None):
-    #     self.lr_scheduler.step(validation_meter.extract(self.cache['monitor_metric']))
