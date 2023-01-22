@@ -7,7 +7,7 @@
 **Install pytorch and torchvision from [official website](https://pytorch.org/), and run:**
 
 ```
-pip install easytorch
+pip install easytorch==3.4.9
 ```
 
 ### Step 2:
